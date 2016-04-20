@@ -1,0 +1,3 @@
+[submodule "prototype_julia/GeneticAlgorithms.jl"]
+	path = prototype_julia/GeneticAlgorithms.jl
+	url = git@github.com:WestleyArgentum/GeneticAlgorithms.jl.git
