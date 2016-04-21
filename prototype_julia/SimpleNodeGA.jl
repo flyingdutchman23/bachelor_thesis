@@ -29,6 +29,18 @@ function fitness(ent)
   return 1.0
 end
 
+#=function fitness()=#
+
+  #=spne = sum(received_packets)=#
+  
+  #=nodes = sum(ent.grid)=#
+  #=spne /= rows * columns * nodes=#
+
+  #=return spne=#
+  
+#=end=#
+
+
 function mutate(ent)
   # let's go crazy and mutate 20% of the time
   rand(Float64) < 0.9 && return
