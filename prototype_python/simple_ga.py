@@ -84,12 +84,13 @@ def received_packets(individual):
 
 
     # print(rec_packs)
-    rec_packs_plot(rec_packs)
+    map_plot(rec_packs,"received packets")
+    nodes_radius_plot(rec_packs,individual,"nodes with radius")
     return rec_packs
 
 
 def SPNEevaluate(individual):
-    print_individual(individual)
+    map_plot(individual, "Node Placement")
     nodes = ROWS * COLS - individual.count(0)
     print("nodes",nodes)
 
@@ -137,7 +138,7 @@ def simple_plot(logbook):
 
     plt.show()
 
-def rec_packs_plot(data):
+def map_plot(data,name):
     
     values = np.reshape(data,(ROWS,COLS))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
@@ -145,19 +146,21 @@ def rec_packs_plot(data):
     cb = plt.colorbar()                                                                       
     plt.ylabel("y [m]")                                                                       
     plt.xlabel("x [m]")                                                                       
-    cb.set_label("received packets")                                                      
+    cb.set_label(name)                                                      
     #TODO save plot
     #plt.savefig(savename)                                                                 
 
     #show the plot                                                                            
     plt.show()
 
-def nodes_plot(data):
+def nodes_radius_plot(data,individual,name):
 
-    return None
-
-def nodes_radius_plot(data):
-
+    #to have an array with just 0 and 1
+    for i, d in enumerate(data):
+        if d != 0:
+            data[i] = 1
+    data = np.add(data,individual)
+    map_plot(data,name)
     return None
 
 
