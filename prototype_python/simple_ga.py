@@ -14,23 +14,26 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
-
 import numpy as np
+import array
+import matplotlib.pyplot as plt
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 
+POP_SIZE = 50
+GEN_NUMBER = 30
+
 ROWS = 16
 COLS = 7
 
-MAX_DIST = 40
+MAX_DIST = 25
 REAL_DIST_CELL = 5
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", np.ndarray, shape=(ROWS,COLS), dtype='bool', order='C',
-        fitness=creator.FitnessMax)
+creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
@@ -48,7 +51,11 @@ def packet_received(ind_index,probe_index):
 
     """
 
-    dist_cells = np.linalg.norm(np.subtract(ind_index,probe_index))
+    ind_row = int(ind_index / COLS)
+    ind_col = ind_index % COLS
+    probe_row = int(probe_index / COLS)
+    probe_col = probe_index % COLS
+    dist_cells = np.linalg.norm(np.subtract((ind_row,ind_col),(probe_row,probe_col)))
     dist_cells *= REAL_DIST_CELL
 
     return dist_cells <= MAX_DIST
@@ -66,79 +73,109 @@ def received_packets(individual):
     """
 
     #array for received packets
-    rec_packs = np.zeros((ROWS,COLS), dtype=np.int, order='C')
+    rec_packs = array.array('I', [0] * len(individual))
 
     #TODO probably performance improvable
-    for ind_index, node in np.ndenumerate(individual):
+    for ind_index, node in enumerate(individual):
         if node != 0:
-            for probe_index, probe in np.ndenumerate(rec_packs):
+            for probe_index, probe in enumerate(rec_packs):
                 if packet_received(ind_index,probe_index) == True:
                     rec_packs[probe_index] += 1
 
 
     # print(rec_packs)
+    rec_packs_plot(rec_packs)
     return rec_packs
 
 
 def SPNEevaluate(individual):
-    print(dir(individual))
-    # print(individual.data)
-    # for i in individual:
-        # print(i)
-    nodes = np.count_nonzero(individual)
+    print_individual(individual)
+    nodes = ROWS * COLS - individual.count(0)
     print("nodes",nodes)
-    spne = received_packets(individual).sum()
 
-    spne /= (nodes * ROWS * COLS)
+    #if there are no nodes, it can be divided by zero!
+    #But the result should be 0
+    spne = 0
+    if nodes != 0:
+        spne = sum(received_packets(individual))
+        spne /= (nodes * ROWS * COLS)
 
-    spne = spne.item()
     print(spne)
     return spne,
 
-def cxTwoPointCopy(ind1, ind2):
-    """Execute a two points crossover with copy on the input individuals. The
-    copy is required because the slicing in numpy returns a view of the data,
-    which leads to a self overwritting in the swap operation. It prevents
-    ::
+def print_individual(individual):
 
-        >>> import numpy
-        >>> a = numpy.array((1,2,3,4))
-        >>> b = numpy.array((5.6.7.8))
-        >>> a[1:3], b[1:3] = b[1:3], a[1:3]
-        >>> print(a)
-        [1 6 7 4]
-        >>> print(b)
-        [5 6 7 8]
-    """
-    size = len(ind1)
-    cxpoint1 = random.randint(1, size)
-    cxpoint2 = random.randint(1, size - 1)
-    if cxpoint2 >= cxpoint1:
-        cxpoint2 += 1
-    else: # Swap the two cx points
-        cxpoint1, cxpoint2 = cxpoint2, cxpoint1
+    print("Individual")
+    for r in range(ROWS):
+        row = []
+        for c in range(COLS):
+            row.append(individual[r * COLS + c])
+        print(r,row)
 
-    ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
-            = ind2[cxpoint1:cxpoint2].copy(), ind1[cxpoint1:cxpoint2].copy()
+def simple_plot(logbook):
+    gen = logbook.select("gen")
+    fit_mins = logbook.select("min")
+    fit_maxs = logbook.select("max")
+    fit_avgs = logbook.select("avg")
 
-    return ind1, ind2
+    import matplotlib.pyplot as plt
+
+    fig, ax1 = plt.subplots()
+    print("gen",gen)
+    print("fit_mins",fit_mins)
+    line1 = ax1.plot(gen, fit_mins, "b", label="Minimum Fitness")
+    line2 = ax1.plot(gen, fit_maxs, "g", label="Maximum Fitness")
+    line3 = ax1.plot(gen, fit_avgs, "r", label="Average Fitness")
+    ax1.set_xlabel("Generation")
+    ax1.set_ylabel("Fitness")
+    # for tl in ax1.get_yticklabels():
+        # tl.set_color("b")
+
+    lns = line1 + line2 + line3
+    labs = [l.get_label() for l in lns]
+    ax1.legend(lns, labs, loc="center right")
+
+    plt.show()
+
+def rec_packs_plot(data):
+    
+    values = np.reshape(data,(ROWS,COLS))
+    plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
+            cmap=plt.get_cmap("gnuplot2"), origin="lower")                           
+    cb = plt.colorbar()                                                                       
+    plt.ylabel("y [m]")                                                                       
+    plt.xlabel("x [m]")                                                                       
+    cb.set_label("received packets")                                                      
+    #TODO save plot
+    #plt.savefig(savename)                                                                 
+
+    #show the plot                                                                            
+    plt.show()
+
+def nodes_plot(data):
+
+    return None
+
+def nodes_radius_plot(data):
+
+    return None
 
 
 toolbox.register("evaluate", SPNEevaluate)
-toolbox.register("mate", cxTwoPointCopy)
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     #random.seed()
 
-    pop = toolbox.population(n=300)
+    pop = toolbox.population(n=POP_SIZE)
 
     # Numpy equality function (operators.eq) between two arrays returns the
     # equality element wise, which raises an exception in the if similar()
     # check of the hall of fame. Using a different equality function like
     # numpy.array_equal or numpy.allclose solve this issue.
-    hof = tools.HallOfFame(1, similar=np.array_equal)
+    hof = tools.HallOfFame(1)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
@@ -146,10 +183,13 @@ def main():
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=1100, stats=stats,
+    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=GEN_NUMBER, stats=stats,
             halloffame=hof)
 
-    return pop, stats, hof
+    print(logbook)
+    return pop, logbook, hof
 
 if __name__ == "__main__":
-    main()
+    pop, logbook, hof = main()
+    simple_plot(logbook)
+
