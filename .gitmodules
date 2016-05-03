@@ -1,6 +1,6 @@
-[submodule "prototype_julia/GeneticAlgorithms.jl"]
-	path = prototype_julia/GeneticAlgorithms.jl
+[submodule "prototype/julia/GeneticAlgorithms.jl"]
+	path = prototype/julia/GeneticAlgorithms.jl
 	url = git@github.com:WestleyArgentum/GeneticAlgorithms.jl.git
-[submodule "prototype_python/deap"]
-	path = prototype_python/deap
+[submodule "prototype/python/deap"]
+	path = prototype/python/deap
 	url = git@github.com:DEAP/deap.git
