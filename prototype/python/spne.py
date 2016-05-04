@@ -3,16 +3,10 @@ import numpy as np
 #to use arrays for calculating the number of received packets
 import array
 #to use ROWS and COLS from the config module
-from config import ROWS, COLS
+from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL
 
-### Currently the calculation is just based on the distance between the cells
-
-### Contants ###
-#for simple version: the maximum distance to communicate, to receive packets
-MAX_DIST = 25
-#for simple version: the real distance between each cell of the matrix
-REAL_DIST_CELL = 5
-
+### Currently the calculation is just based on the distance between the cells and the
+### RaLANS calculation will be added soon
 
 def set_max_dist(max_dist):
 	"""sets a new value for the maximum distance, at wich 2 nodes can communicate
