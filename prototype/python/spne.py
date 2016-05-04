@@ -90,13 +90,14 @@ def received_packets(individual):
     return rec_packs
 
 
-def evaluate(individual):
+def dist_evaluate(individual):
     """
-    computes the value of the SPNE metric for the given individual 
+    computes the value of the SPNE metric for the given individual based on the distance.
 
     :individual: the individual, for which SPNE as its fitness should calculated
 
-    :returns: the numeric value of the SPNE metric
+    :returns: the numeric value of the SPNE metric as a float
+
     """
     # map_plot(individual, "Node Placement")
     nodes = ROWS * COLS - individual.count(0)
@@ -111,3 +112,16 @@ def evaluate(individual):
 
     #print(spne)
     return spne,
+
+def ralans_evaluate(individual):
+    """
+    computes the value of the SPNE metric for the given individual based on the data from
+    RaLaNS
+
+    :individual: the individual, for which SPNE as its fitness should calculated
+
+    :returns: the numeric value of the SPNE metric as a float
+
+    """
+    #TODO write the function
+    return 0.0

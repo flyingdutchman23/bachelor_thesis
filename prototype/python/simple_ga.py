@@ -51,7 +51,7 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.att
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 #which functions to use for specific part of ga
-toolbox.register("evaluate", spne.evaluate)
+toolbox.register("evaluate", spne.dist_evaluate)
 toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
