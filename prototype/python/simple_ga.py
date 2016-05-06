@@ -74,6 +74,7 @@ def main():
 
     plot_helper.avg_min_max(logbook)
 
+    plot_helper.scatter_map_dist(hof[0])
     return pop, logbook, hof
 
 if __name__ == "__main__":
