@@ -6,6 +6,8 @@ import numpy as np
 from config import ROWS, COLS, GEN_NUMBER, POP_SIZE, MAX_DIST, REAL_DIST_CELL
 #for saving a file with time stamp
 import time
+#to plot map of received packets
+import spne
 
 ###helper module to plot specific states and results
 
@@ -35,7 +37,7 @@ def avg_min_max(logbook):
 def map(data,name):
     values = np.reshape(data,(ROWS,COLS))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
-            cmap=plt.get_cmap("gnuplot2"), origin="lower")
+            cmap=plt.get_cmap("gray"), origin="lower")
     cb = plt.colorbar()
     plt.ylabel("y [m]")
     plt.xlabel("x [m]")
@@ -52,17 +54,15 @@ def scatter_map_dist(individual):
     :individual: should be the individual, may work for other kind of data as well
 
     """
-    print(individual)
-    fig = plt.figure('Scatter Plot 2')
-    # fig, ax = plt.subplots(1, 1)
+    fig = plt.figure('Plots ')
 
     rows = []
     cols = []
 
     values = np.reshape(individual,(ROWS,COLS))
-    # print(values)
+
     for index, gen in np.ndenumerate(values):
-        if gen == 0:
+        if gen == 1:
             rows.append(index[0] * REAL_DIST_CELL)
             cols.append(index[1] * REAL_DIST_CELL)
             circle = plt.Circle((index[0]*REAL_DIST_CELL,index[1]*REAL_DIST_CELL), 
@@ -73,14 +73,9 @@ def scatter_map_dist(individual):
     fig.gca().scatter(rows,cols)
     name = "nodes_with_circles" + str(int(time.time()))
     fig.savefig(name)
-    print("after show")
 
-def nodes_radius(data,individual,name):
+def nodes_with_range(individual,name):
 
-    #to have an array with just 0 and 1
-    for i, d in enumerate(data):
-        if d != 0:
-            data[i] = 1
-    data = np.add(data,individual)
-    map_plot(data,name)
-    return None
+    data, nodes = spne.received_packets(individual)
+    name += ", nodes: " + str(nodes) + ", packs: " + str(sum(data))
+    map(data,name)

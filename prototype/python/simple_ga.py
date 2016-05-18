@@ -65,14 +65,19 @@ stats.register("max", np.max)
 
 def main():
     #to have same random numbers
-    random.seed(POP_SIZE)
+    #random.seed(POP_SIZE)
 
     pop = toolbox.population(n=POP_SIZE)
+    for i in range(POP_SIZE):
+        title = "individual after init, nodes: " + str(sum(pop[i]))
+        # plot_helper.map(pop[i],title)
     hof = tools.HallOfFame(1)
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=GEN_NUMBER, 
             stats=stats, halloffame=hof)
 
     plot_helper.avg_min_max(logbook)
+    plot_helper.map(hof[0],"best individual after end")
+    plot_helper.nodes_with_range(hof[0],"best individual after end")
 
     plot_helper.scatter_map_dist(hof[0])
     return pop, logbook, hof

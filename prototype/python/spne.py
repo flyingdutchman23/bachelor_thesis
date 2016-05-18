@@ -4,31 +4,35 @@ import numpy as np
 import array
 #to use ROWS and COLS from the config module
 from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL
+#to plot for testing
+import plot_helper
+#to print individual for debug
+import print_helper
 
 ### Currently the calculation is just based on the distance between the cells and the
 ### RaLANS calculation will be added soon
 
 def set_max_dist(max_dist):
-	"""sets a new value for the maximum distance, at wich 2 nodes can communicate
+    """sets a new value for the maximum distance, at wich 2 nodes can communicate
 
-	:max_dist: the maximum distance
+    :max_dist: the maximum distance
 
-	"""
-	assert max_dist > 0
-	global MAX_DIST
-	MAX_DIST = max_dist
+    """
+    assert max_dist > 0
+    global MAX_DIST
+    MAX_DIST = max_dist
 
 def set_real_dist_cell(real_dist_cell):
-	"""sets a new value for the real distance between each center of cell, if the
-	cells are placed in a grid. So the distance is the distance between neighboured
-	cells in the same row or column.
+    """sets a new value for the real distance between each center of cell, if the
+    cells are placed in a grid. So the distance is the distance between neighboured
+    cells in the same row or column.
 
-	:real_dist_cell: the real distance between two neighbouring cells
+    :real_dist_cell: the real distance between two neighbouring cells
 
-	"""
-	assert real_dist_cell > 0
-	global REAL_DIST_CELL
-	REAL_DIST_CELL = real_dist_cell
+    """
+    assert real_dist_cell > 0
+    global REAL_DIST_CELL
+    REAL_DIST_CELL = real_dist_cell
 
 
 def packet_received(ind_index,probe_index):
@@ -69,19 +73,22 @@ def received_packets(individual):
 
     #array for received packets
     rec_packs = array.array('I', [0] * len(individual))
+    #array for indices of node positions
+    nodes = np.nonzero(individual)[0]
+    # print_helper.individual(individual)
 
     #TODO probably performance improvable
-    for ind_index, node in enumerate(individual):
-        if node != 0:
-            for probe_index, probe in enumerate(rec_packs):
-                if packet_received(ind_index,probe_index) == True:
-                    rec_packs[probe_index] += 1
+    for node_index in nodes:
+        for probe_index in range(len(individual)):
+            if packet_received(node_index,probe_index) == True:
+                rec_packs[probe_index] += 1
 
 
     # print(rec_packs)
-    #map_plot(rec_packs,"received packets")
+    # plot_helper.map(individual,"individual in current calc")
+    # plot_helper.map(rec_packs,"received packets")
     # nodes_radius_plot(rec_packs,individual,"nodes with radius")
-    return rec_packs
+    return rec_packs, len(nodes)
 
 
 def dist_evaluate(individual):
@@ -93,18 +100,16 @@ def dist_evaluate(individual):
     :returns: the numeric value of the SPNE metric as a float
 
     """
-    # map_plot(individual, "Node Placement")
-    nodes = ROWS * COLS - individual.count(0)
-    #print("nodes",nodes)
 
     #if there are no nodes, it can be divided by zero!
     #The result should be 0, if there are no nodes, of course
+    #do it as an assertion, because it will assured in an init function later on
+    assert sum(individual) > 0
     spne = 0
-    if nodes != 0:
-        spne = sum(received_packets(individual))
-        spne /= (nodes * ROWS * COLS)
+    rec_packs, nodes = received_packets(individual)
+    spne = sum(rec_packs)
+    spne /= (nodes * ROWS * COLS)
 
-    #print(spne)
     return spne,
 
 def ralans_evaluate(individual):
