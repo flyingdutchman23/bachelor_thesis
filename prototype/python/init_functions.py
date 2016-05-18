@@ -22,6 +22,22 @@ def normal_random():
 
 #TODO create init functions for specific, own data
 
+def zeros():
+    """initializes an individual with just 0s
+
+    :returns: the individual
+
+    """
+    return [0] * IND_LEN
+
+def ones():
+    """initializes an individual with just 1s
+
+    :returns: the individual
+
+    """
+    return [1] * IND_LEN
+
 def fixed_number_random(num_of_nodes):
     """initializes an individual randomly with a given number of nodes
 
