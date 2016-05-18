@@ -3,7 +3,7 @@ import numpy as np
 #to use arrays for calculating the number of received packets
 import array
 #to use ROWS and COLS from the config module
-from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL
+from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL, IND_LEN
 #to plot for testing
 import plot_helper
 #to print individual for debug
@@ -129,7 +129,7 @@ def graph_received_packets(individual):
     """
 
     #number of received packets
-    num_received_packets = 0
+    num_received_packets = -IND_LEN
     #array for indices of node positions
     nodes = np.nonzero(individual)[0]
     #Graph to store nodes
@@ -141,7 +141,7 @@ def graph_received_packets(individual):
     #build Graph by adding an edge between the nodes, which are connected
     for node_index1, node1 in enumerate(nodes):
         for node_index2, node2 in enumerate(nodes):
-            if node1 != node2 and packet_received(node1,node2) == True:
+            if node_index1 != node_index2 and packet_received(node1,node2) == True:
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
 
@@ -150,13 +150,16 @@ def graph_received_packets(individual):
     probe_node = g.add_vertex()
     # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
     # computed and summed up
-    for probe in range(len(individual)):
+    for probe in range(IND_LEN):
         for node_index, node in enumerate(nodes):
             if packet_received(probe, node) == True:
                 g.add_edge(probe_node,g.vertex(node_index))
         labeling = gt.label_out_component(g,probe_node)
         num_received_packets += sum(labeling.a)
         g.clear_vertex(probe_node)
+
+    #otherwise something totally wrong
+    assert num_received_packets >= 0
 
     return num_received_packets, num_of_nodes
 
