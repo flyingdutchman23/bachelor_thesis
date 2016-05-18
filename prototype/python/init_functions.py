@@ -33,8 +33,15 @@ def fixed_number_random(num_of_nodes):
 
     assert num_of_nodes > 0
 
-    return random.sample(range(IND_LEN),num_of_nodes)
+    node_positions = random.sample(range(IND_LEN),num_of_nodes)
+    ind = zeros()
+    for node_position in node_positions:
+        ind[node_position] = 1
 
+    #to check that algorithm works correct
+    assert sum(ind) == num_of_nodes
+
+    return ind
 
 def flexible_random(probability):
     """initializes an individual randomly with a given probability to place a node on each
