@@ -1,6 +1,8 @@
 
 ### helper module to print specific states and results via normal print on terminal
 
+from config import ROWS, COLS
+
 def individual(individual):
 
     print("Individual, nodes: ",sum(individual))
