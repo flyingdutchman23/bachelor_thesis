@@ -32,7 +32,7 @@ def draw_individual_graph(individual,name):
     gt.graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output=name)
 
 
-def avg_min_max(logbook,save=False):
+def avg_min_max(logbook,save=False,to_show=True):
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
     fit_maxs = logbook.select("max")
@@ -58,9 +58,10 @@ def avg_min_max(logbook,save=False):
         name = "Statistics_" + str(int(time.time()))
         fig.savefig(name)
 
-    plt.show()
+    if to_show:
+        plt.show()
 
-def map(data,name,save=True):
+def map(data,name,save=True,to_show=True):
     #clear last figure, if it exists
     plt.clf()
     values = np.reshape(data,(ROWS,COLS))
@@ -77,9 +78,10 @@ def map(data,name,save=True):
         plt.savefig(name)
 
     #show the plot
-    plt.show()
+    if to_show:
+        plt.show()
 
-def scatter_map_dist(individual,save=True):
+def scatter_map_dist(individual,save=True,to_show=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -106,8 +108,11 @@ def scatter_map_dist(individual,save=True):
         name = "nodes_with_circles" + "_" + str(int(time.time()))
         fig.savefig(name)
 
-def nodes_with_range(individual,name):
+    if to_show:
+        plt.show()
+
+def nodes_with_range(individual,name,save=True,to_show=True):
 
     data, nodes = spne.received_packets(individual)
     name += ", nodes: " + str(nodes) + ", packs: " + str(sum(data))
-    map(data,name)
+    map(data,name,save,to_show)
