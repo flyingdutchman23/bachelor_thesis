@@ -12,6 +12,6 @@ ROWS = 5
 COLS = 5
 
 #for simple version: the maximum distance to communicate, to receive packets
-MAX_DIST = 9.0
+MAX_DIST = 1.1
 #for simple version: the real distance between each cell of the matrix
 REAL_DIST_CELL = 1

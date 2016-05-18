@@ -8,6 +8,8 @@ from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL
 import plot_helper
 #to print individual for debug
 import print_helper
+#to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
+import graph_tool.all as gt
 
 ### Currently the calculation is just based on the distance between the cells and the
 ### RaLANS calculation will be added soon
@@ -108,6 +110,70 @@ def dist_evaluate(individual):
     spne = 0
     rec_packs, nodes = received_packets(individual)
     spne = sum(rec_packs)
+    spne /= (nodes * ROWS * COLS)
+
+    return spne,
+
+def graph_received_packets(individual):
+    """
+
+    computes the number of received packets for the given individual.
+    The number of received packets is currently just based on the distance of the probe
+    node to all the placed nodes of the individual. The probe node is placed on every
+    position.
+
+    :individual: the individual, for which the received_packets should be computed
+
+    :returns: an ndarray containing the number of received packets in each item
+
+    """
+
+    #number of received packets
+    num_received_packets = 0
+    #array for indices of node positions
+    nodes = np.nonzero(individual)[0]
+    #Graph to store nodes
+    g = gt.Graph(directed=False)
+    #add a vertex for each node in the individual
+    num_of_nodes = len(nodes)
+    g.add_vertex(num_of_nodes)
+
+    #build Graph by adding an edge between the nodes, which are connected
+    for node_index1, node1 in enumerate(nodes):
+        for node_index2, node2 in enumerate(nodes):
+            if node1 != node2 and packet_received(node1,node2) == True:
+                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
+
+
+
+    #add probe node to graph
+    probe_node = g.add_vertex()
+    # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
+    # computed and summed up
+    for probe in range(len(individual)):
+        for node_index, node in enumerate(nodes):
+            if packet_received(probe, node) == True:
+                g.add_edge(probe_node,g.vertex(node_index))
+        labeling = gt.label_out_component(g,probe_node)
+        num_received_packets += sum(labeling.a)
+        g.clear_vertex(probe_node)
+
+    return num_received_packets, num_of_nodes
+
+def graph_dist_evaluate(individual):
+    """
+
+    computes the value of the SPNE metric for the given individual based on the distance.
+
+    :individual: the individual, for which SPNE as its fitness should calculated
+
+    :returns: the numeric value of the SPNE metric as a float
+
+    """
+    assert sum(individual) > 0
+    spne = 0
+    rec_packs, nodes = graph_received_packets(individual)
+    spne = rec_packs
     spne /= (nodes * ROWS * COLS)
 
     return spne,

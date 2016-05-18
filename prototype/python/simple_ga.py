@@ -51,7 +51,7 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.att
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 #which functions to use for specific part of ga
-toolbox.register("evaluate", spne.dist_evaluate)
+toolbox.register("evaluate", spne.graph_dist_evaluate)
 toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
@@ -80,6 +80,7 @@ def main():
     plot_helper.nodes_with_range(hof[0],"best individual after end")
 
     plot_helper.scatter_map_dist(hof[0])
+    plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
     return pop, logbook, hof
 
 if __name__ == "__main__":
