@@ -28,11 +28,11 @@ def draw_individual_graph(individual,name):
             if spne.packet_received(node1,node2) == True:
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
-    name += ".png"
+    name += "_" + str(int(time.time())) + ".png"
     gt.graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output=name)
 
 
-def avg_min_max(logbook):
+def avg_min_max(logbook,save=False):
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
     fit_maxs = logbook.select("max")
@@ -53,9 +53,16 @@ def avg_min_max(logbook):
     labs = [l.get_label() for l in lns]
     ax1.legend(lns, labs, loc="center right")
 
+    #save the plot
+    if save:
+        name = "Statistics_" + str(int(time.time()))
+        fig.savefig(name)
+
     plt.show()
 
-def map(data,name):
+def map(data,name,save=True):
+    #clear last figure, if it exists
+    plt.clf()
     values = np.reshape(data,(ROWS,COLS))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
             cmap=plt.get_cmap("gray"), origin="lower")
@@ -63,13 +70,16 @@ def map(data,name):
     plt.ylabel("y [m]")
     plt.xlabel("x [m]")
     cb.set_label(name)
-    #TODO save plot
-    #plt.savefig(savename)
+
+    #save the plot
+    if save:
+        name = name + "_" + str(int(time.time()))
+        plt.savefig(name)
 
     #show the plot
     plt.show()
 
-def scatter_map_dist(individual):
+def scatter_map_dist(individual,save=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -92,8 +102,9 @@ def scatter_map_dist(individual):
             fig.gca().plot(index[0]*REAL_DIST_CELL,index[1]*REAL_DIST_CELL)
 
     fig.gca().scatter(rows,cols)
-    name = "nodes_with_circles" + str(int(time.time()))
-    fig.savefig(name)
+    if save:
+        name = "nodes_with_circles" + "_" + str(int(time.time()))
+        fig.savefig(name)
 
 def nodes_with_range(individual,name):
 
