@@ -3,7 +3,7 @@
 
 def individual(individual):
 
-    print("Individual")
+    print("Individual, nodes: ",sum(individual))
     for r in range(ROWS):
         row = []
         for c in range(COLS):
