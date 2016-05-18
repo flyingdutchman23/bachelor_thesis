@@ -104,6 +104,8 @@ def scatter_map_dist(individual,save=True,to_show=True):
             fig.gca().plot(index[0]*REAL_DIST_CELL,index[1]*REAL_DIST_CELL)
 
     fig.gca().scatter(rows,cols)
+    fig.gca().set_xlim([0,ROWS])
+    fig.gca().set_ylim([0,COLS])
     if save:
         name = "nodes_with_circles" + "_" + str(int(time.time()))
         fig.savefig(name)
