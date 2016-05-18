@@ -34,6 +34,7 @@ from config import ROWS, COLS, GEN_NUMBER, POP_SIZE
 #to use some util functions
 import plot_helper
 import print_helper
+import init_functions as init
 
 ###Set up genetic algorithm
 #specify individual, creation of it
@@ -43,10 +44,9 @@ creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 
 #Each gen is initialized with either 0 or 1
-toolbox.register("attr_bool", random.randint, 0, 1)
+toolbox.register("my_init", init.normal_random)
 #registers function to init individual
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool,
-        n=ROWS*COLS)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.my_init)
 #how to init hole population -> in list
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
