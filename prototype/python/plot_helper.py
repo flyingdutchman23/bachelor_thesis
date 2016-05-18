@@ -11,6 +11,10 @@ import spne
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
 import graph_tool.all as gt
 
+#so every saved plot in 1 run has same time
+START_TIME = time.time()
+START_TIME_STR = str(int(START_TIME))
+
 ###helper module to plot specific states and results
 
 def draw_individual_graph(individual,name):
@@ -28,7 +32,7 @@ def draw_individual_graph(individual,name):
             if spne.packet_received(node1,node2) == True:
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
-    name += "_" + str(int(time.time())) + ".png"
+    name += "_" + START_TIME_STR + ".png"
     gt.graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output=name)
 
 
@@ -55,7 +59,7 @@ def avg_min_max(logbook,save=False,to_show=True):
 
     #save the plot
     if save:
-        name = "Statistics_" + str(int(time.time()))
+        name = "Statistics_" + START_TIME_STR
         fig.savefig(name)
 
     if to_show:
@@ -74,7 +78,7 @@ def map(data,name,save=True,to_show=True):
 
     #save the plot
     if save:
-        name = name + "_" + str(int(time.time()))
+        name = name + "_" + START_TIME_STR
         plt.savefig(name)
 
     #show the plot
@@ -107,7 +111,7 @@ def scatter_map_dist(individual,save=True,to_show=True):
     fig.gca().set_xlim([0,ROWS])
     fig.gca().set_ylim([0,COLS])
     if save:
-        name = "nodes_with_circles" + "_" + str(int(time.time()))
+        name = "nodes_with_circles" + "_" + START_TIME_STR
         fig.savefig(name)
 
     if to_show:
