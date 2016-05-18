@@ -2,9 +2,9 @@
 ###Global Constants
 
 #Population Size
-POP_SIZE = 10
+POP_SIZE = 15
 #Number of Generations to run the algorithm
-GEN_NUMBER = 10
+GEN_NUMBER = 5
 
 #Number of rows the map has
 ROWS = 5

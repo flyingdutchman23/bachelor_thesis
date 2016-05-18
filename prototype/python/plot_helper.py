@@ -74,6 +74,8 @@ def map(data,name,save=True,to_show=True):
     cb = plt.colorbar()
     plt.ylabel("y [m]")
     plt.xlabel("x [m]")
+    plt.gcf().gca().set_ylim([0,ROWS-0.5])
+    plt.gcf().gca().set_xlim([0,COLS-0.5])
     cb.set_label(name)
 
     #save the plot
@@ -102,14 +104,14 @@ def scatter_map_dist(individual,save=True,to_show=True):
         if gen == 1:
             rows.append(index[0] * REAL_DIST_CELL)
             cols.append(index[1] * REAL_DIST_CELL)
-            circle = plt.Circle((index[0]*REAL_DIST_CELL,index[1]*REAL_DIST_CELL), 
+            circle = plt.Circle((index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL), 
                     radius=MAX_DIST, color='r',fill=False)
             fig.gca().add_artist(circle)
-            fig.gca().plot(index[0]*REAL_DIST_CELL,index[1]*REAL_DIST_CELL)
+            fig.gca().plot(index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL)
 
-    fig.gca().scatter(rows,cols)
-    fig.gca().set_xlim([0,ROWS])
-    fig.gca().set_ylim([0,COLS])
+    fig.gca().scatter(cols,rows)
+    fig.gca().set_ylim([0,ROWS-0.5])
+    fig.gca().set_xlim([0,COLS-0.5])
     if save:
         name = "nodes_with_circles" + "_" + START_TIME_STR
         fig.savefig(name)
