@@ -10,6 +10,8 @@ GEN_NUMBER = 10
 ROWS = 5
 #Number of columns the map has
 COLS = 5
+#length of an individual
+IND_LEN = ROWS * COLS
 
 #for simple version: the maximum distance to communicate, to receive packets
 MAX_DIST = 1.1
