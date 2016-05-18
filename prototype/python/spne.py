@@ -179,6 +179,10 @@ def graph_dist_evaluate(individual):
     spne = rec_packs
     spne /= (nodes * ROWS * COLS)
 
+    #check boundaries of the SPNE metric
+    assert spne <= 1
+    assert spne >= 0
+
     return spne,
 
 def ralans_evaluate(individual):
