@@ -87,6 +87,7 @@ def map(data,name,save=True,to_show=True,description=""):
     #clear last figure, if it exists
     plt.clf()
     values = np.reshape(data,(ROWS,COLS))
+
     plt.gcf().add_axes((0.2,0.2,0.7,0.7))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
             cmap=plt.get_cmap("gray"), origin="lower")
@@ -115,8 +116,18 @@ def scatter_map_dist(individual,name,save=True,to_show=True,print_fitness=True,
     :individual: should be the individual, may work for other kind of data as well
 
     """
-    fig = plt.figure('Plots ')
-    fig.add_axes((0.2,0.2,0.7,0.7))
+    fig = plt.figure(figsize=(8,8))
+
+    #make correct relation of width and height in plot
+    left = 0.2
+    bottom = 0.2
+    if ROWS > COLS:
+        left += (0.9 - left) * (1 - COLS / ROWS)
+    elif COLS > ROWS:
+        bottom += (0.9 - bottom) * (1 - ROWS / COLS)
+
+    print("left, bottom: ",left,bottom)
+    fig.add_axes((left,bottom, 0.9 - left, 0.9 - bottom))
 
     rows = []
     cols = []
