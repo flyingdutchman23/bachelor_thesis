@@ -123,11 +123,13 @@ def build_graph(nodes):
     """
     g = gt.Graph(directed=False)
 
-    g.add_vertex(len(nodes))
+    num_of_nodes = len(nodes)
+    g.add_vertex(num_of_nodes)
 
     #build Graph by adding an edge between the nodes, which are connected
     for node_index1, node1 in enumerate(nodes):
-        for node_index2, node2 in enumerate(nodes):
+        for node_index2 in range((node_index1+1),num_of_nodes):
+            node2 = nodes[node_index2]
             if node_index1 != node_index2 and packet_received(node1,node2) == True:
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
@@ -162,7 +164,6 @@ def graph_received_packets(individual):
             if packet_received(probe, node) == True:
                 g.add_edge(probe_node,g.vertex(node_index))
         labeling = gt.label_out_component(g,probe_node)
-        #TODO check the labeling
         num_received_packets += sum(labeling.a)
         g.clear_vertex(probe_node)
 
