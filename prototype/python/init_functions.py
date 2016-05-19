@@ -2,7 +2,7 @@
 
 import random
 
-from config import IND_LEN
+from config import IND_LEN, COLS, ROWS
 
 def normal_random():
     """initializes an individual with just random boolean values
@@ -20,7 +20,60 @@ def normal_random():
 
     return ind
 
-#TODO create init functions for specific, own data
+def corners():
+    """initializes an individual with 4 nodes. Each node is placed in the corner of the
+    grid.
+
+    :returns: the individual
+
+    """
+    # the positions in the order top-left, top-right, bottom-left, bottom-right
+    # or in most plots bottom-left, bottom-right, top-left, top-right
+    positions = [0, COLS-1, COLS * (ROWS-1), IND_LEN-1]
+
+    return multiple_nodes(positions)
+
+def one_in_mid():
+    """initializes an individual with 1 node placed in the center of the grid. The
+    position of the mid is:
+    the integer of IND_LEN / 2
+
+    :returns: the individual
+
+    """
+    return one_node(int(IND_LEN / 2))
+
+def multiple_nodes(positions):
+    """initializes an individual with multiple nodes at their given position.
+
+    :positions: The positions for all the nodes. It should be an iterable, which contains
+    all the positions of the nodes. It has to be an integer, which is in the range
+    of 0 and IND_LEN-1
+
+    :returns: the individual
+
+    """
+    assert all(positions) >= 0
+    assert all(positions) < IND_LEN
+    assert len(positions) <= IND_LEN
+
+    ind = zeros()
+
+    for pos in positions:
+        ind[pos] = 1
+
+    return ind
+
+def one_node(pos):
+    """initializes an individual with exactly 1 node at a given position
+
+    :pos: the position the node should have. It has to be an integer, which is in the range
+    of 0 and IND_LEN-1
+
+    :returns: the individual
+
+    """
+    return multiple_nodes([pos])
 
 def zeros():
     """initializes an individual with just 0s
