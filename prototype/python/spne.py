@@ -135,7 +135,7 @@ def build_graph(nodes):
 
     return g
 
-def graph_received_packets(individual):
+def graph_received_packets(individual, nodes=None):
     """
     computes the number of received packets for the given individual.
     The number of received packets is currently just based on the distance of the probe
@@ -150,8 +150,11 @@ def graph_received_packets(individual):
 
     #number of received packets
     num_received_packets = -IND_LEN
+
     #array for indices of node positions
-    nodes = np.nonzero(individual)[0]
+    if nodes==None:
+        nodes = np.nonzero(individual)[0]
+
     #build the Graph to store the nodes
     g = build_graph(nodes)
 
@@ -170,7 +173,7 @@ def graph_received_packets(individual):
     #otherwise something totally wrong
     assert num_received_packets >= 0
 
-    return num_received_packets, len(nodes)
+    return num_received_packets
 
 def graph_dist_evaluate(individual):
     """
@@ -182,11 +185,13 @@ def graph_dist_evaluate(individual):
     :returns: the numeric value of the SPNE metric as a float
 
     """
-    assert sum(individual) > 0
-    spne = 0
-    rec_packs, nodes = graph_received_packets(individual)
-    spne = rec_packs
-    spne /= (nodes * ROWS * COLS)
+    nodes = np.nonzero(individual)[0]
+    num_of_nodes = len(nodes)
+    if num_of_nodes == 0:
+        return 0,
+
+    rec_packs = graph_received_packets(individual,nodes)
+    spne = rec_packs / (num_of_nodes * ROWS * COLS)
 
     #check boundaries of the SPNE metric
     assert spne <= 1
