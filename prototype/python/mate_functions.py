@@ -69,7 +69,7 @@ def lochert_mate(ind1,ind2):
     # print("After MATE !!!!")
     # print_helper.individual(ind1)
     # print_helper.individual(ind2)
-    print("sum individual 1:",sum(ind1))
-    print("sum individual 2:",sum(ind2))
+    # print("sum individual 1:",sum(ind1))
+    # print("sum individual 2:",sum(ind2))
 
     return ind1, ind2
