@@ -3,13 +3,15 @@ import matplotlib.pyplot as plt
 #to plot with numpy arrays
 import numpy as np
 #to have access to the global constants and variables
-from config import ROWS, COLS, GEN_NUMBER, POP_SIZE, MAX_DIST, REAL_DIST_CELL
+from config import ROWS, COLS, GEN_NUMBER, POP_SIZE, MAX_DIST, REAL_DIST_CELL, IND_LEN
 #for saving a file with time stamp
 import time
 #to plot map of received packets
 import spne
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
 import graph_tool.all as gt
+
+import init_functions as init
 
 #so every saved plot in 1 run has same time
 START_TIME = time.time()
@@ -19,18 +21,9 @@ START_TIME_STR = str(int(START_TIME))
 
 def draw_individual_graph(individual,name):
 
+    #build Graph to store nodes for plotting
     nodes = np.nonzero(individual)[0]
-    #Graph to store nodes
-    g = gt.Graph(directed=False)
-    #add a vertex for each node in the individual
-    num_of_nodes = len(nodes)
-    g.add_vertex(num_of_nodes)
-
-    #build Graph by adding an edge between the nodes, which are connected
-    for node_index1, node1 in enumerate(nodes):
-        for node_index2, node2 in enumerate(nodes):
-            if spne.packet_received(node1,node2) == True:
-                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
+    g = spne.build_graph(nodes)
 
     name += "_" + START_TIME_STR + ".png"
     gt.graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output=name)

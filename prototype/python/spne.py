@@ -114,9 +114,27 @@ def dist_evaluate(individual):
 
     return spne,
 
+def build_graph(nodes):
+    """builds the graph for the individual with the given positions of the nodes
+
+    :nodes: an iterable of the positions of the nodes
+    :returns: the Graph object
+
+    """
+    g = gt.Graph(directed=False)
+
+    g.add_vertex(len(nodes))
+
+    #build Graph by adding an edge between the nodes, which are connected
+    for node_index1, node1 in enumerate(nodes):
+        for node_index2, node2 in enumerate(nodes):
+            if node_index1 != node_index2 and packet_received(node1,node2) == True:
+                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
+
+    return g
+
 def graph_received_packets(individual):
     """
-
     computes the number of received packets for the given individual.
     The number of received packets is currently just based on the distance of the probe
     node to all the placed nodes of the individual. The probe node is placed on every
@@ -132,19 +150,8 @@ def graph_received_packets(individual):
     num_received_packets = -IND_LEN
     #array for indices of node positions
     nodes = np.nonzero(individual)[0]
-    #Graph to store nodes
-    g = gt.Graph(directed=False)
-    #add a vertex for each node in the individual
-    num_of_nodes = len(nodes)
-    g.add_vertex(num_of_nodes)
-
-    #build Graph by adding an edge between the nodes, which are connected
-    for node_index1, node1 in enumerate(nodes):
-        for node_index2, node2 in enumerate(nodes):
-            if node_index1 != node_index2 and packet_received(node1,node2) == True:
-                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
-
-
+    #build the Graph to store the nodes
+    g = build_graph(nodes)
 
     #add probe node to graph
     probe_node = g.add_vertex()
@@ -155,13 +162,14 @@ def graph_received_packets(individual):
             if packet_received(probe, node) == True:
                 g.add_edge(probe_node,g.vertex(node_index))
         labeling = gt.label_out_component(g,probe_node)
+        #TODO check the labeling
         num_received_packets += sum(labeling.a)
         g.clear_vertex(probe_node)
 
     #otherwise something totally wrong
     assert num_received_packets >= 0
 
-    return num_received_packets, num_of_nodes
+    return num_received_packets, len(nodes)
 
 def graph_dist_evaluate(individual):
     """
