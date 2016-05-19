@@ -67,8 +67,8 @@ def map(data,name,save=True,to_show=True):
     cb = plt.colorbar()
     plt.ylabel("y [m]")
     plt.xlabel("x [m]")
-    plt.gcf().gca().set_ylim([0,ROWS-0.5])
-    plt.gcf().gca().set_xlim([0,COLS-0.5])
+    plt.gcf().gca().set_ylim([-0.5,ROWS-0.5])
+    plt.gcf().gca().set_xlim([-0.5,COLS-0.5])
     cb.set_label(name)
 
     #save the plot
@@ -103,8 +103,8 @@ def scatter_map_dist(individual,name,save=True,to_show=True):
             fig.gca().plot(index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL)
 
     fig.gca().scatter(cols,rows)
-    fig.gca().set_ylim([0,ROWS-0.5])
-    fig.gca().set_xlim([0,COLS-0.5])
+    fig.gca().set_ylim([-0.5,ROWS-0.5])
+    fig.gca().set_xlim([-0.5,COLS-0.5])
 
     if save:
         name = "nodes_with_circles" + "_" + name + START_TIME_STR
