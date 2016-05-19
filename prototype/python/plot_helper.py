@@ -87,7 +87,7 @@ def map(data,name,save=True,to_show=True):
     if to_show:
         plt.show()
 
-def scatter_map_dist(individual,save=True,to_show=True):
+def scatter_map_dist(individual,name,save=True,to_show=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -112,8 +112,9 @@ def scatter_map_dist(individual,save=True,to_show=True):
     fig.gca().scatter(cols,rows)
     fig.gca().set_ylim([0,ROWS-0.5])
     fig.gca().set_xlim([0,COLS-0.5])
+
     if save:
-        name = "nodes_with_circles" + "_" + START_TIME_STR
+        name = "nodes_with_circles" + "_" + name + START_TIME_STR
         fig.savefig(name)
 
     if to_show:
