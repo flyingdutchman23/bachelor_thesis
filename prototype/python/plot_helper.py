@@ -37,8 +37,6 @@ def draw_individual_graph(individual,name):
         else:
             output_size = (MAX_WINDOW,MAX_WINDOW)
 
-    print("size: ",output_size)
-
     #build Graph to store nodes for plotting
     nodes = np.nonzero(individual)[0]
     g = spne.build_graph(nodes)
@@ -48,7 +46,6 @@ def draw_individual_graph(individual,name):
         pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
         pos =  (pos[1] * output_size[0] / COLS,
                 pos[0] * output_size[1] / ROWS)
-        print("pos: ",pos)
         positions[g.vertex(node_index)] = pos
 
 
