@@ -58,10 +58,11 @@ def avg_min_max(logbook,save=False,to_show=True):
     if to_show:
         plt.show()
 
-def map(data,name,save=True,to_show=True):
+def map(data,name,save=True,to_show=True,description=""):
     #clear last figure, if it exists
     plt.clf()
     values = np.reshape(data,(ROWS,COLS))
+    plt.gcf().add_axes((0.2,0.2,0.7,0.7))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
             cmap=plt.get_cmap("gray"), origin="lower")
     cb = plt.colorbar()
@@ -69,7 +70,9 @@ def map(data,name,save=True,to_show=True):
     plt.xlabel("x [m]")
     plt.gcf().gca().set_ylim([-0.5,ROWS-0.5])
     plt.gcf().gca().set_xlim([-0.5,COLS-0.5])
+    plt.gcf().suptitle(name)
     cb.set_label(name)
+    plt.figtext(0.1,0.1,description)
 
     #save the plot
     if save:
@@ -80,13 +83,15 @@ def map(data,name,save=True,to_show=True):
     if to_show:
         plt.show()
 
-def scatter_map_dist(individual,name,save=True,to_show=True):
+def scatter_map_dist(individual,name,save=True,to_show=True,print_fitness=True,
+        description=""):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
 
     """
     fig = plt.figure('Plots ')
+    fig.add_axes((0.2,0.2,0.7,0.7))
 
     rows = []
     cols = []
@@ -105,6 +110,12 @@ def scatter_map_dist(individual,name,save=True,to_show=True):
     fig.gca().scatter(cols,rows)
     fig.gca().set_ylim([-0.5,ROWS-0.5])
     fig.gca().set_xlim([-0.5,COLS-0.5])
+    fig.suptitle(name)
+
+    #add description
+    if print_fitness:
+        description += "Fitness: " + str(individual.fitness.values)
+    fig.text(0.1,0.1,description)
 
     if save:
         name = "nodes_with_circles" + "_" + name + START_TIME_STR
@@ -119,7 +130,7 @@ def nodes_with_range(individual,name,save=True,to_show=True):
     name += ", nodes: " + str(nodes) + ", packs: " + str(sum(data))
     map(data,name,save,to_show)
 
-def graph_nodes_with_range(individual,name,save=True,to_show=True):
+def graph_nodes_with_range(individual,name,save=True,to_show=True, print_fitness=True):
 
     #array to store received packets
     data = init.zeros()
@@ -142,4 +153,8 @@ def graph_nodes_with_range(individual,name,save=True,to_show=True):
         g.clear_vertex(probe_node)
 
     name += ", nodes: " + str(len(nodes)) + ", packs: " + str(sum(data))
-    map(data,name,save,to_show)
+
+    description = ""
+    if print_fitness:
+        description = "Fitness: " + str(individual.fitness.values)
+    map(data,name,save,to_show,description)
