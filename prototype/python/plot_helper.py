@@ -13,6 +13,8 @@ import graph_tool.all as gt
 
 import init_functions as init
 
+import my_util
+
 #so every saved plot in 1 run has same time
 START_TIME = time.time()
 START_TIME_STR = str(int(START_TIME))
@@ -21,12 +23,38 @@ START_TIME_STR = str(int(START_TIME))
 
 def draw_individual_graph(individual,name):
 
+    MAX_WINDOW = 1000
+    output_size = (80 * COLS, 80 * ROWS)
+
+    #to keep the relation of the window and to keep the size smaller than MAX_WINDOW
+    if max(output_size) > MAX_WINDOW:
+        if ROWS > COLS:
+            col_size = int(output_size[1] / (output_size[0] / MAX_WINDOW))
+            output_size = (MAX_WINDOW,col_size)
+        elif COLS > ROWS:
+            row_size = int(output_size[0] / (output_size[1] / MAX_WINDOW))
+            output_size = (row_size,MAX_WINDOW)
+        else:
+            output_size = (MAX_WINDOW,MAX_WINDOW)
+
+    print("size: ",output_size)
+
     #build Graph to store nodes for plotting
     nodes = np.nonzero(individual)[0]
     g = spne.build_graph(nodes)
 
+    positions = g.new_vertex_property("vector<double>")
+    for node_index in range(len(nodes)):
+        pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
+        pos =  (pos[1] * output_size[0] / COLS,
+                pos[0] * output_size[1] / ROWS)
+        print("pos: ",pos)
+        positions[g.vertex(node_index)] = pos
+
+
     name += "_" + START_TIME_STR + ".png"
-    gt.graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output=name)
+    gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=18, 
+            output=name, output_size=output_size)
 
 
 def avg_min_max(logbook,save=False,to_show=True):
