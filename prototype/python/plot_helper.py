@@ -118,3 +118,28 @@ def nodes_with_range(individual,name,save=True,to_show=True):
     data, nodes = spne.received_packets(individual)
     name += ", nodes: " + str(nodes) + ", packs: " + str(sum(data))
     map(data,name,save,to_show)
+
+def graph_nodes_with_range(individual,name,save=True,to_show=True):
+
+    #array to store received packets
+    data = init.zeros()
+    nodes = np.nonzero(individual)[0]
+    #build the Graph to store the nodes
+    g = spne.build_graph(nodes)
+
+    #add probe node to graph
+    probe_node = g.add_vertex()
+    # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
+    # computed and summed up
+    for probe in range(IND_LEN):
+        for node_index, node in enumerate(nodes):
+            if spne.packet_received(probe, node) == True:
+                g.add_edge(probe_node,g.vertex(node_index))
+        labeling = gt.label_out_component(g,probe_node)
+        #if the nodes are connected
+        # then increase the field where the probe nodes is currently in the matrix
+        data[probe] += sum(labeling.a) - 1
+        g.clear_vertex(probe_node)
+
+    name += ", nodes: " + str(len(nodes)) + ", packs: " + str(sum(data))
+    map(data,name,save,to_show)
