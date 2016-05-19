@@ -11,6 +11,8 @@ import print_helper
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
 import graph_tool.all as gt
 
+import my_util
+
 ### Currently the calculation is just based on the distance between the cells and the
 ### RaLANS calculation will be added soon
 
@@ -51,11 +53,9 @@ def packet_received(ind_index,probe_index):
 
     """
 
-    ind_row = int(ind_index / COLS)
-    ind_col = ind_index % COLS
-    probe_row = int(probe_index / COLS)
-    probe_col = probe_index % COLS
-    dist_cells = np.linalg.norm(np.subtract((ind_row,ind_col),(probe_row,probe_col)))
+    ind = my_util.onedpos_to_2dpos(ind_index)
+    probe = my_util.onedpos_to_2dpos(probe_index)
+    dist_cells = np.linalg.norm(np.subtract(ind,probe))
     dist_cells *= REAL_DIST_CELL
 
     return dist_cells <= MAX_DIST
