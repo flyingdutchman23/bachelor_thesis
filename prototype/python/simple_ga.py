@@ -36,6 +36,7 @@ import plot_helper
 import print_helper
 import init_functions as init
 import mate_functions as mate
+import mutate_functions as mutate
 
 ###Set up genetic algorithm
 #specify individual, creation of it
@@ -45,7 +46,9 @@ creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 
 #Each gen is initialized with either 0 or 1
-toolbox.register("my_init", init.fixed_number_random, 3)
+toolbox.register("my_init", init.flexible_random, 0.04)
+# toolbox.register("my_init", init.normal_random)
+# toolbox.register("my_init", init.fixed_number_random, 10)
 #registers function to init individual
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.my_init)
 #how to init hole population -> in list
@@ -53,7 +56,10 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 #which functions to use for specific part of ga
 toolbox.register("evaluate", spne.graph_dist_evaluate)
-toolbox.register("mate", mate.lochert_mate)
+# toolbox.register("mate", mate.lochert_mate)
+# toolbox.register("mate", tools.cxOnePoint)
+toolbox.register("mate", tools.cxTwoPoint)
+# toolbox.register("mutate", mutate.lochert_mutate_one)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
@@ -69,18 +75,22 @@ def main():
     #random.seed(POP_SIZE)
 
     pop = toolbox.population(n=POP_SIZE)
+    print("len of pop:",len(pop))
+    print_helper.individual(pop[0])
     # for i in range(POP_SIZE):
         # title = "individual after init, nodes: " + str(sum(pop[i]))
         # plot_helper.map(pop[i],title)
     hof = tools.HallOfFame(1)
-    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.00, ngen=GEN_NUMBER, 
+    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, ngen=GEN_NUMBER, 
             stats=stats, halloffame=hof)
 
+    print("len of pop:",len(pop))
+    print_helper.individual(pop[0])
     plot_helper.avg_min_max(logbook)
     plot_helper.map(hof[0],"best_individual_after_end")
-    plot_helper.nodes_with_range(hof[0],"best_individual_after_end")
+    plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
 
-    plot_helper.scatter_map_dist(hof[0])
+    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
     plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
     print_helper.individual(hof[0])
     return pop, logbook, hof
