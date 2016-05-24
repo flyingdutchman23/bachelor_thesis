@@ -1,3 +1,5 @@
+# to create a folder
+import os
 #to plot
 import matplotlib.pyplot as plt
 #to plot with numpy arrays
@@ -6,18 +8,23 @@ import numpy as np
 from config import ROWS, COLS, GEN_NUMBER, POP_SIZE, MAX_DIST, REAL_DIST_CELL, IND_LEN
 #for saving a file with time stamp
 import time
+
+###My package imports
 #to plot map of received packets
 import spne
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
 import graph_tool.all as gt
-
 import init_functions as init
-
 import my_util
 
 #so every saved plot in 1 run has same time
 START_TIME = time.time()
 START_TIME_STR = str(int(START_TIME))
+
+#to save plots in that folder
+FOLDER = "../plots/" + "plot_" + START_TIME_STR + "/"
+if not os.path.exists(FOLDER):
+        os.makedirs(FOLDER)
 
 ###helper module to plot specific states and results
 
@@ -45,13 +52,13 @@ def draw_individual_graph(individual,name):
     for node_index in range(len(nodes)):
         pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
         pos =  (pos[1] * output_size[0] / COLS,
-                pos[0] * output_size[1] / ROWS)
+                output_size[1] - (pos[0] * output_size[1] / ROWS))
         positions[g.vertex(node_index)] = pos
 
 
     name += "_" + START_TIME_STR + ".png"
     gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=18, 
-            output=name, output_size=output_size)
+            output=FOLDER+name, output_size=output_size)
 
 
 def avg_min_max(logbook,save=False,to_show=True):
@@ -78,7 +85,7 @@ def avg_min_max(logbook,save=False,to_show=True):
     #save the plot
     if save:
         name = "Statistics_" + START_TIME_STR
-        fig.savefig(name)
+        fig.savefig(FOLDER+name)
 
     if to_show:
         plt.show()
@@ -103,7 +110,7 @@ def map(data,name,save=True,to_show=True,description=""):
     #save the plot
     if save:
         name = name + "_" + START_TIME_STR
-        plt.savefig(name)
+        plt.savefig(FOLDER+name)
 
     #show the plot
     if to_show:
@@ -155,7 +162,7 @@ def scatter_map_dist(individual,name,save=True,to_show=True,print_fitness=True,
 
     if save:
         name = "nodes_with_circles" + "_" + name + START_TIME_STR
-        fig.savefig(name)
+        fig.savefig(FOLDER+name)
 
     if to_show:
         plt.show()
