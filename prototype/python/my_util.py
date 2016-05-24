@@ -13,4 +13,4 @@ def onedpos_to_2dpos(pos):
     pos_row = int(pos / COLS)
     pos_col = pos % COLS
 
-    return pos_row, pos_col
+    return [pos_row, pos_col]
