@@ -14,8 +14,7 @@ import graph_tool.all as gt
 
 import my_util
 #to evaluate with RaLaNS
-# from port3_ralans.src.util.parseResFile import parseResFile
-# from ralans.viewer2d import getFiles, parseConfigFile
+from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 
 ### Currently the calculation is just based on the distance between the cells and the
 ### RaLANS calculation will be added soon
@@ -42,29 +41,29 @@ def set_real_dist_cell(real_dist_cell):
     global REAL_DIST_CELL
     REAL_DIST_CELL = real_dist_cell
 
-# def ralans_packet_received(filename=FILENAME, height=HEIGHT, stepsize=STEPSIZE):
-    # """calculates whether the given node can connect to another cell on the map. It
-    # calculates the signal strength to every cell in the grid.
+def ralans_packet_received(node_index=1, filename=FILENAME, height=HEIGHT, 
+        stepsize=STEPSIZE, isZip=True):
+    """calculates whether the given node can connect to another cell on the map. It
+    calculates the signal strength to every cell in the grid.
 
-    # :node_index: the index of the node
-    # :filename: the path to the RaLaNS file. It has to be a zip file.
-    # :returns: true, if there is a connection from node 1 to node 2.
-            # false, else.
-    # """
+    :node_index: the index of the node
+    :filename: the path to the RaLaNS file. It has to be a zip file.
+    :returns: true, if there is a connection from node 1 to node 2.
+            false, else.
+    """
 
     # TODO open file at correct position, so that it is just done ones
-    # resfile, bdfile, configfile = getFiles(filename)
 
-    # config = parseConfigFile(configfile, isZip=True)
+    if isZip:
+        resfile, bdfile, configfile = getFiles(filename)
+        config = parseConfigFile(configfile, isZip=isZip)
 
     # TODO change encoding of pint in grid
-    # requestedTransmitter = my_util.onedpos_to_2dpos(node_index)
-    # requestedTransmitter.append(height)
-    # res, borders, transmitter, stp = parseResFile(filename, requestedTransmitter, 
-            # stepsize)
-    # print(res.shape)
-
-
+    requestedTransmitter = my_util.onedpos_to_2dpos(node_index)
+    requestedTransmitter.append(height)
+    res, borders, transmitter, stp = parseResFile.parseResFile(filename, 
+            requestedTransmitter, stepsize)
+    print(res.shape)
     
 
 def packet_received(ind_index,probe_index):

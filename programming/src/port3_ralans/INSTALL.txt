@@ -1,0 +1,41 @@
+RaLaNS INSTALLATION GUIDE
+
+First install all the needed software and packages (you have to be ROOT for pretty much every step):
+sudo apt-get update
+sudo apt-get install g++ python python-numpy python-matplotlib python-pp python-setuptools python-lxml subversion python-opengl python-pygame python-pip make
+
+Installation of the utm package (for transformation of coordinates) is not possible through apt-get:
+pip install utm
+
+Change into the directory */ralans/src/launcher and compile the software with make, go back to */ralans.
+If there is the following Error:
+#error This file requires compiler and library support for the ISO C++ 2011 standard. This support is currently experimental, and must be enabled with the -std=c++11 or -std=gnu++11 compiler options.
+Uncomment the compiler options behind CFLAGS in */ralans/src/launcher/Makefile
+
+Now you should be good to go:
+python run.py inputfiles/small_street_flat.osm name='example'
+
+you can get a 2d result view with:
+python viewer2d.py outputfiles/small_street_flat_example.zip
+
+You may find more examples in EXAMPLE.txt
+
+
+
+
+If there is an error with multiarray not found, you might have an old version of pp, make sure, you have the following version  -  On Ubuntu 14.04 or higher, this did not happen:
+pp (Parallel Python) 1.6.4  (might be available on http://www.parallelpython.com/downloads/pp/pp-1.6.4.tar.gz)
+manual installation is possible the same way as for utm:
+cd ..
+wget http://www.parallelpython.com/downloads/pp/pp-1.6.4.tar.gz
+tar -xzf pp-1.6.4.tar.gz
+cd pp-1.6.4
+sudo python setup.py install
+
+
+
+If other problems arise, check if you are using the following versions or higher:
+Python 2.7.4 (2.7.6 has been tested successfully, too)
+NumPy 1.7.1 (1.6.1 has been tested successfully, too)
+matplotlib 1.3.1 (1.4.3 has been tested successfully, too)
+Ubuntu 14.10 (13.04, 12.04 and LinuXMint 17.1 has been tested successfully, too)
