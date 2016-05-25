@@ -116,8 +116,8 @@ def map(data,name,save=True,to_show=True,description=""):
     if to_show:
         plt.show()
 
-def scatter_map_dist(individual,name,save=True,to_show=True,print_fitness=True,
-        description=""):
+def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=True,
+        description="", add_circles=True, add_grid=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -145,14 +145,20 @@ def scatter_map_dist(individual,name,save=True,to_show=True,print_fitness=True,
         if gen == 1:
             rows.append(index[0] * REAL_DIST_CELL)
             cols.append(index[1] * REAL_DIST_CELL)
-            circle = plt.Circle((index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL), 
+            if add_circles:
+                circle = plt.Circle((index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL), 
                     radius=MAX_DIST, color='r',fill=False)
-            fig.gca().add_artist(circle)
-            fig.gca().plot(index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL)
+                fig.gca().add_artist(circle)
+                fig.gca().plot(index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL)
 
     fig.gca().scatter(cols,rows)
     fig.gca().set_ylim([-0.5,ROWS-0.5])
     fig.gca().set_xlim([-0.5,COLS-0.5])
+
+    if add_grid:
+        fig.gca().xaxis.set_ticks(np.arange(0.5,COLS-0.5,1))
+        fig.gca().yaxis.set_ticks(np.arange(0.5,COLS-0.5,1))
+        fig.gca().grid(True,linestyle='solid')
     fig.suptitle(name)
 
     #add description
