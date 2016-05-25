@@ -54,6 +54,8 @@ def ralans_packet_received(node_index=1, filename=FILENAME, height=HEIGHT,
 
     # TODO open file at correct position, so that it is just done ones
 
+    resfile = filename
+    config = None
     if isZip:
         resfile, bdfile, configfile = getFiles(filename)
         config = parseConfigFile(configfile, isZip=isZip)
@@ -61,8 +63,8 @@ def ralans_packet_received(node_index=1, filename=FILENAME, height=HEIGHT,
     # TODO change encoding of pint in grid
     requestedTransmitter = my_util.onedpos_to_2dpos(node_index)
     requestedTransmitter.append(height)
-    res, borders, transmitter, stp = parseResFile.parseResFile(filename, 
-            requestedTransmitter, stepsize)
+    res, borders, transmitter, stp = parseResFile.parseResFile(resfile, 
+            requestedTransmitter, stepsize, isZip=isZip)
     print(res.shape)
     
 

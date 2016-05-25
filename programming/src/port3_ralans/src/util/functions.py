@@ -71,6 +71,8 @@ def parseConfigFile(filename, isZip=False):
         f = open(filename)
 
     for line in f:
+        # print(line)
+        line = line.decode('utf8')
         s = line.split("#")[0].split(" = ")
         if len(s) > 1:
             try:

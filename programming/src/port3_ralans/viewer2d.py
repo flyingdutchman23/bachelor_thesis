@@ -53,7 +53,7 @@ def getFiles(zipf):
     for i, l in enumerate(resfile):
         print("index: ",i," content: ", l)
         if i == 1:
-            rechead = int(l[0])
+            rechead = int(chr(l[0]))
             break
     resfile.close()
     resfile = zf.open(rf)

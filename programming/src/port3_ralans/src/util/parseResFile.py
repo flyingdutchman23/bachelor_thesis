@@ -98,6 +98,18 @@ file.seek(0)
 file.seek(line_offset[n])
 """
 
+def conv_byte_to_str(line):
+    """converts a readed line of bytes into a line, which is a string. if the line is
+    already a string it just returns the string.
+
+    :line: the line, which should be either a string or a line of bytes
+    :returns: the line decoded as a string
+
+    """
+    if isinstance(line,bytes):
+        line = line.decode('utf8')
+    return line
+
 
 def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None, isZip=False):
     """
@@ -111,7 +123,9 @@ def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None
     else:
         f = open(filename)
 
-    headtr = np.loadtxt(io.StringIO(f.readline()), delimiter=" ")
+    line = conv_byte_to_str(f.readline())
+    print("type line: ", type(line))
+    headtr = np.loadtxt(io.StringIO(line), delimiter=" ")
     # headtr = np.loadtxt(io.StringIO(testline), delimiter=" ")
     print("headtr: ", headtr)
     transmitters = parseTransmitterHeader(headtr)
@@ -119,7 +133,8 @@ def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None
     trid = getTransmitterID(requestedTransmitter, transmitters, stepsize)
     if DEBUG: print("Id of selected transmitter: ", trid)
 
-    headrec = np.loadtxt(io.StringIO(f.readline()), delimiter=" ")
+    line = conv_byte_to_str(f.readline())
+    headrec = np.loadtxt(io.StringIO(line), delimiter=" ")
     t = int(headrec[0])
     borders, stp, height, leng = parseHead(headrec, t)
     if DEBUG: print("bd, steps, height, len:", borders, stp, height, leng)
@@ -158,6 +173,7 @@ def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None
                 continue
             elif start + off <= i < start + off + sy:
                 if len(l.strip()) > 0:
+                    l = conv_byte_to_str(l)
                     res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
             else:
                 break
@@ -172,7 +188,8 @@ def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None
                 continue
             elif i == trid:
                 if len(l.strip()) > 0:
-                    res.append(np.genfromtxt(io.StringIO(l), delimiter=" ").tolist())
+                    l = conv_byte_to_str(l)
+                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
             else:
                 break
 
