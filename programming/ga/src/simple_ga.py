@@ -129,7 +129,7 @@ def run():
         # title = "individual after init, nodes: " + str(sum(pop[i]))
         # plot_helper.map(pop[i],title)
 
-    hof = tools.HallOfFame(1)
+    hof = tools.HallOfFame(config.HOF_NUM)
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 

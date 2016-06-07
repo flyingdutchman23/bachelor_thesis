@@ -35,6 +35,8 @@ INIT = None
 INIT_ARG = None
 # to specify which way to calculate the fitness is used
 FITNESS = None
+# to specify the number of individuals, which are saved in the hall of fame
+HOF_NUM = None
 
 # the positions on the map, which should be evaluated.
 POSITIONS = None	
@@ -97,7 +99,7 @@ def fill_config(configfile):
     genetic_arg_options = ['MUTATE', 'SELECT', 'MATE', 'INIT', 'FITNESS']
     genetic_args = list(genetic_arg_options)
     genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB',
-        'MUTATE_PROB','INIT_ARG'])
+        'MUTATE_PROB','INIT_ARG','HOF_NUM'])
 
     for argument_name in genetic_args:
         globals()[argument_name] = config['genetic_algorithm'][argument_name]
