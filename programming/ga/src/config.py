@@ -1,5 +1,11 @@
 # to use the system exit function
 import sys
+#for saving a file with time stamp
+import time
+# to create a folder
+import os
+# to copy a file
+import shutil
 # to parse the RaLaNS config
 from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 # to open zipfiles to read RaLaNS data
@@ -78,14 +84,29 @@ CUBIC = 3
 # the constant for list
 LIST = 4
 
+#so every saved plot in 1 run has same time
+START_TIME = time.time()
+START_TIME_STR = str(int(START_TIME))
+
+#to save plots in that folder
+FOLDER = "../results/" + "ga_run_" + START_TIME_STR + "/"
+if not os.path.exists(FOLDER):
+    os.makedirs(FOLDER)
+else:
+    sys.exit('save folder exists already, it should not!')
+
 def fill_config(configfile):
-    """fill the config global variables with the values given by the config argument. Quits,
+    """
+    fill the config global variables with the values given by the config argument. Quits,
     if something is invalid.
 
     :config: contains the arguments given from the parser of argparse.
     :returns: None
 
     """
+
+    # save a copy of the configfile in the result folder as well
+    shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
     configspec = configobj.ConfigObj(CONFIGSPECFILE, list_values=False)
     config = configobj.ConfigObj(configfile, configspec=configspec, list_values=True)
