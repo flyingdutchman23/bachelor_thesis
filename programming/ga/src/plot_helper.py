@@ -4,12 +4,12 @@ import os
 import matplotlib.pyplot as plt
 #to plot with numpy arrays
 import numpy as np
-#to have access to the global constants and variables
-from config import ROWS, COLS, GEN_NUMBER, POP_SIZE, MAX_DIST, REAL_DIST_CELL, IND_LEN
 #for saving a file with time stamp
 import time
 
 ###My package imports
+#to have access to the global constants and variables
+import config
 #to plot map of received packets
 import spne
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
@@ -22,7 +22,7 @@ START_TIME = time.time()
 START_TIME_STR = str(int(START_TIME))
 
 #to save plots in that folder
-FOLDER = "../plots/" + "plot_" + START_TIME_STR + "/"
+FOLDER = "../results/" + "ga_run_" + START_TIME_STR + "/"
 if not os.path.exists(FOLDER):
         os.makedirs(FOLDER)
 
@@ -31,14 +31,14 @@ if not os.path.exists(FOLDER):
 def draw_individual_graph(individual,name):
 
     MAX_WINDOW = 1000
-    output_size = (80 * COLS, 80 * ROWS)
+    output_size = (80 * config.LENG[0], 80 * config.LENG[1])
 
     #to keep the relation of the window and to keep the size smaller than MAX_WINDOW
     if max(output_size) > MAX_WINDOW:
-        if ROWS > COLS:
+        if config.LENG[1] > config.LENG[0]:
             col_size = int(output_size[1] / (output_size[0] / MAX_WINDOW))
             output_size = (MAX_WINDOW,col_size)
-        elif COLS > ROWS:
+        elif config.LENG[0] > config.LENG[1]:
             row_size = int(output_size[0] / (output_size[1] / MAX_WINDOW))
             output_size = (row_size,MAX_WINDOW)
         else:
@@ -51,8 +51,8 @@ def draw_individual_graph(individual,name):
     positions = g.new_vertex_property("vector<double>")
     for node_index in range(len(nodes)):
         pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
-        pos =  (pos[1] * output_size[0] / COLS,
-                output_size[1] - (pos[0] * output_size[1] / ROWS))
+        pos =  (pos[1] * output_size[0] / config.LENG[0],
+                output_size[1] - (pos[0] * output_size[1] / config.LENG[1]))
         positions[g.vertex(node_index)] = pos
 
 
@@ -93,7 +93,7 @@ def avg_min_max(logbook,save=False,to_show=True):
 def map(data,name,save=True,to_show=True,description=""):
     #clear last figure, if it exists
     plt.clf()
-    values = np.reshape(data,(ROWS,COLS))
+    values = np.reshape(data,(config.LENG[1],config.LENG[0]))
 
     plt.gcf().add_axes((0.2,0.2,0.7,0.7))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
@@ -101,8 +101,8 @@ def map(data,name,save=True,to_show=True,description=""):
     cb = plt.colorbar()
     plt.ylabel("y [m]")
     plt.xlabel("x [m]")
-    plt.gcf().gca().set_ylim([-0.5,ROWS-0.5])
-    plt.gcf().gca().set_xlim([-0.5,COLS-0.5])
+    plt.gcf().gca().set_ylim([-0.5,config.LENG[1]-0.5])
+    plt.gcf().gca().set_xlim([-0.5,config.LENG[0]-0.5])
     plt.gcf().suptitle(name)
     cb.set_label(name)
     plt.figtext(0.1,0.1,description)
@@ -128,10 +128,10 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     #make correct relation of width and height in plot
     left = 0.2
     bottom = 0.2
-    if ROWS > COLS:
-        left += (0.9 - left) * (1 - COLS / ROWS)
-    elif COLS > ROWS:
-        bottom += (0.9 - bottom) * (1 - ROWS / COLS)
+    if config.LENG[1] > config.LENG[0]:
+        left += (0.9 - left) * (1 - config.LENG[0] / config.LENG[1])
+    elif config.LENG[0] > config.LENG[1]:
+        bottom += (0.9 - bottom) * (1 - config.LENG[1] / config.LENG[0])
 
     print("left, bottom: ",left,bottom)
     fig.add_axes((left,bottom, 0.9 - left, 0.9 - bottom))
@@ -139,25 +139,25 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     rows = []
     cols = []
 
-    values = np.reshape(individual,(ROWS,COLS))
+    values = np.reshape(individual,(config.LENG[1],config.LENG[0]))
 
     for index, gen in np.ndenumerate(values):
         if gen == 1:
-            rows.append(index[0] * REAL_DIST_CELL)
-            cols.append(index[1] * REAL_DIST_CELL)
+            rows.append(index[0] * config.REAL_DIST_CELL)
+            cols.append(index[1] * config.REAL_DIST_CELL)
             if add_circles:
-                circle = plt.Circle((index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL), 
-                    radius=MAX_DIST, color='r',fill=False)
+                circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
+                    radius=config.MAX_DIST, color='r',fill=False)
                 fig.gca().add_artist(circle)
-                fig.gca().plot(index[1]*REAL_DIST_CELL,index[0]*REAL_DIST_CELL)
+                fig.gca().plot(index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL)
 
     fig.gca().scatter(cols,rows)
-    fig.gca().set_ylim([-0.5,ROWS-0.5])
-    fig.gca().set_xlim([-0.5,COLS-0.5])
+    fig.gca().set_ylim([-0.5,config.LENG[1]-0.5])
+    fig.gca().set_xlim([-0.5,config.LENG[0]-0.5])
 
     if add_grid:
-        fig.gca().xaxis.set_ticks(np.arange(0.5,COLS-0.5,1))
-        fig.gca().yaxis.set_ticks(np.arange(0.5,COLS-0.5,1))
+        fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
+        fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
         fig.gca().grid(True,linestyle='solid')
     fig.suptitle(name)
 
@@ -191,7 +191,7 @@ def graph_nodes_with_range(individual,name,save=True,to_show=True, print_fitness
     probe_node = g.add_vertex()
     # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
     # computed and summed up
-    for probe in range(IND_LEN):
+    for probe in range(config.IND_LEN):
         for node_index, node in enumerate(nodes):
             if spne.packet_received(probe, node) == True:
                 g.add_edge(probe_node,g.vertex(node_index))
