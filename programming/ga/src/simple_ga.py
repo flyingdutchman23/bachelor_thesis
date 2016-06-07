@@ -19,6 +19,8 @@ import random
 import numpy as np
 #to use arrays for the gen sequence, individual
 import array
+# to exit program if mistake occurs
+import sys
 
 #from the genetic algorithms package
 from deap import algorithms
@@ -30,38 +32,17 @@ from deap import tools
 #to use the spne metric
 import spne
 #to have access to the global constants and variables
-from config import ROWS, COLS, GEN_NUMBER, POP_SIZE
+import config
 #to use some util functions
-import plot_helper
+# TODO activate later
+# import plot_helper
 import print_helper
-import init_functions as init
-import mate_functions as mate
-import mutate_functions as mutate
+import init_functions as inits
+import mate_functions as mates
+import mutate_functions as mutates
 
-###Set up genetic algorithm
-#specify individual, creation of it
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
-
-#Each gen is initialized with either 0 or 1
-toolbox.register("my_init", init.flexible_random, 0.04)
-# toolbox.register("my_init", init.normal_random)
-# toolbox.register("my_init", init.fixed_number_random, 10)
-#registers function to init individual
-toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.my_init)
-#how to init hole population -> in list
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
-#which functions to use for specific part of ga
-toolbox.register("evaluate", spne.graph_dist_evaluate)
-# toolbox.register("mate", mate.lochert_mate)
-# toolbox.register("mate", tools.cxOnePoint)
-toolbox.register("mate", tools.cxTwoPoint)
-# toolbox.register("mutate", mutate.lochert_mutate_one)
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=3)
 
 #which values to measure for the fitnesses of the individuals
 stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -70,30 +51,95 @@ stats.register("std", np.std)
 stats.register("min", np.min)
 stats.register("max", np.max)
 
-def main():
-    #to have same random numbers
-    #random.seed(POP_SIZE)
 
-    pop = toolbox.population(n=POP_SIZE)
+def init():
+    #specify individual, creation of it
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+
+    print('init', config.INIT)
+    # Choose init function
+    if config.INIT == 0:
+        toolbox.register("init", inits.normal_random)
+    elif config.INIT == 1:
+        num_of_nodes = int(config.INIT_ARG)
+        assert num_of_nodes > 0
+        toolbox.register("init", inits.fixed_number_random, num_of_nodes)
+    elif config.INIT == 2:
+        prob_to_set_node = float(config.INIT_ARG)
+        assert prob_to_set_node >= 0.0
+        assert prob_to_set_node <= 1.0
+        toolbox.register("init", inits.flexible_random, prob_to_set_node)
+    elif config.INIT == 3:
+        sys.exit('this option is not implemented yet!')
+    elif config.INIT == 4:
+        sys.exit('this option is not implemented yet!')
+    else:
+        sys.exit('Wrong init function!')
+
+    #registers function to init individual
+    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.init)
+    #how to init hole population -> in list
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    
+    #which functions to use for specific part of ga
+    if config.FITNESS == 0:
+        toolbox.register("evaluate", spne.graph_dist_evaluate)
+    elif config.FITNESS == 1:
+        sys.exit('this option is not implemented yet!')
+    else:
+        sys.exit('Wrong fitness function!')
+
+    if config.MATE == 0:
+        toolbox.register("mate", tools.cxTwoPoint)
+    elif config.MATE == 1:
+        toolbox.register("mate", tools.cxOnePoint)
+    elif config.MATE == 2:
+        toolbox.register("mate", mates.lochert_mate)
+    else:
+        sys.exit('Wrong mate function!')
+
+    if config.MUTATE == 0:
+        toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
+    elif config.MUTATE == 1:
+        toolbox.register("mutate", mutates.lochert_mutate_one)
+    elif config.MUTATE == 2:
+        sys.exit('this option is not implemented yet!')
+    else:
+        sys.exit('Wrong mutate function!')
+
+    if config.SELECT == 0:
+        toolbox.register("select", tools.selTournament, tournsize=3)
+    elif config.SELECT == 1:
+        sys.exit('this option is not implemented yet!')
+    else:
+        sys.exit('Wrong select function!')
+
+
+def run():
+    #to have same random numbers
+    # random.seed(config.POP_SIZE)
+
+    pop = toolbox.population(n=config.POP_SIZE)
+
     print("len of pop:",len(pop))
     print_helper.individual(pop[0])
-    # for i in range(POP_SIZE):
+    # for i in range(config.POP_SIZE):
         # title = "individual after init, nodes: " + str(sum(pop[i]))
         # plot_helper.map(pop[i],title)
     hof = tools.HallOfFame(1)
-    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, ngen=GEN_NUMBER, 
-            stats=stats, halloffame=hof)
+    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, 
+            ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
     print("len of pop:",len(pop))
-    print_helper.individual(pop[0])
-    plot_helper.avg_min_max(logbook)
-    plot_helper.map(hof[0],"best_individual_after_end")
-    plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
+    # print_helper.individual(pop[0])
+    # plot_helper.avg_min_max(logbook)
+    # plot_helper.map(hof[0],"best_individual_after_end")
+    # plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
 
-    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
-    plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
-    print_helper.individual(hof[0])
+    # plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
+    # plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
+    # print_helper.individual(hof[0])
+
+    #TODO save the information somewhere
     return pop, logbook, hof
-
-if __name__ == "__main__":
-    pop, logbook, hof = main()

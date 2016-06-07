@@ -1,5 +1,5 @@
 #all kind of small functions needed for this project
-from config import COLS, ROWS
+import config
 
 def onedpos_to_2dpos(pos):
     """converts the position of the array into a tuple, which describes the position in
@@ -10,7 +10,7 @@ def onedpos_to_2dpos(pos):
 
     """
 
-    pos_row = int(pos / COLS)
-    pos_col = pos % COLS
+    pos_row = int(pos / config.LENG[0])
+    pos_col = pos % config.LENG[0]
 
     return [pos_row, pos_col]

@@ -10,7 +10,7 @@ import numpy as np
 
 import random
 
-from config import IND_LEN
+import config
 
 import print_helper
 
@@ -45,7 +45,7 @@ def lochert_mate(ind1,ind2):
     # to count the number of nodes set in the child
     count_set = 0
     
-    for index in range(IND_LEN):
+    for index in range(config.IND_LEN):
         if ind1[index] ==  1:
             count_total += 1
             if ind2[index] == 1:

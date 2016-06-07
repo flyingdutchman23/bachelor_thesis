@@ -2,11 +2,11 @@
 import numpy as np
 #to use arrays for calculating the number of received packets
 import array
-#to use ROWS and COLS from the config module
-from config import ROWS, COLS, MAX_DIST, REAL_DIST_CELL, IND_LEN, \
-FILENAME, HEIGHT, STEPSIZE
+#to use config.LENG[1] and config.LENG[0] from the config module
+import config
 #to plot for testing
-import plot_helper
+# TODO activate
+# import plot_helper
 #to print individual for debug
 import print_helper
 #to use a Graph to compute the SPNE fitness, to simulate Multi-Hop
@@ -19,30 +19,8 @@ from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 ### Currently the calculation is just based on the distance between the cells and the
 ### RaLANS calculation will be added soon
 
-def set_max_dist(max_dist):
-    """sets a new value for the maximum distance, at wich 2 nodes can communicate
-
-    :max_dist: the maximum distance
-
-    """
-    assert max_dist > 0
-    global MAX_DIST
-    MAX_DIST = max_dist
-
-def set_real_dist_cell(real_dist_cell):
-    """sets a new value for the real distance between each center of cell, if the
-    cells are placed in a grid. So the distance is the distance between neighboured
-    cells in the same row or column.
-
-    :real_dist_cell: the real distance between two neighbouring cells
-
-    """
-    assert real_dist_cell > 0
-    global REAL_DIST_CELL
-    REAL_DIST_CELL = real_dist_cell
-
-def ralans_packet_received(node_index=1, filename=FILENAME, height=HEIGHT, 
-        stepsize=STEPSIZE, isZip=True):
+def ralans_packet_received(node_index=1, filename=config.FILENAME, height=config.COVERAGE_LEVEL, 
+        stepsize=config.STEPSIZE, isZip=True):
     """calculates whether the given node can connect to another cell on the map. It
     calculates the signal strength to every cell in the grid.
 
@@ -77,7 +55,7 @@ def packet_received(ind_index,probe_index):
     :ind_index: the index of the node in the individual
     :probe_index: the index of the probe node
 
-    :returns: true, if distance between ind_index and probe_index is smaller than MAX_DIST
+    :returns: true, if distance between ind_index and probe_index is smaller than config.MAX_DIST
               false, else
 
     """
@@ -85,9 +63,9 @@ def packet_received(ind_index,probe_index):
     ind = my_util.onedpos_to_2dpos(ind_index)
     probe = my_util.onedpos_to_2dpos(probe_index)
     dist_cells = np.linalg.norm(np.subtract(ind,probe))
-    dist_cells *= REAL_DIST_CELL
+    dist_cells *= config.REAL_DIST_CELL
 
-    return dist_cells <= MAX_DIST
+    return dist_cells <= config.MAX_DIST
 
 
 def received_packets(individual):
@@ -139,7 +117,7 @@ def dist_evaluate(individual):
     spne = 0
     rec_packs, nodes = received_packets(individual)
     spne = sum(rec_packs)
-    spne /= (nodes * ROWS * COLS)
+    spne /= (nodes * config.LENG[1] * config.LENG[0])
 
     return spne,
 
@@ -178,7 +156,7 @@ def graph_received_packets(individual, nodes=None):
     """
 
     #number of received packets
-    num_received_packets = -IND_LEN
+    num_received_packets = -config.IND_LEN
 
     #array for indices of node positions
     if nodes==None:
@@ -191,7 +169,7 @@ def graph_received_packets(individual, nodes=None):
     probe_node = g.add_vertex()
     # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
     # computed and summed up
-    for probe in range(IND_LEN):
+    for probe in range(config.IND_LEN):
         for node_index, node in enumerate(nodes):
             if packet_received(probe, node) == True:
                 g.add_edge(probe_node,g.vertex(node_index))
@@ -220,7 +198,7 @@ def graph_dist_evaluate(individual):
         return 0,
 
     rec_packs = graph_received_packets(individual,nodes)
-    spne = rec_packs / (num_of_nodes * ROWS * COLS)
+    spne = rec_packs / (num_of_nodes * config.LENG[1] * config.LENG[0])
 
     #check boundaries of the SPNE metric
     assert spne <= 1
