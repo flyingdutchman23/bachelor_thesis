@@ -150,22 +150,27 @@ def graph_received_packets(individual, nodes=None):
     position.
 
     :individual: the individual, for which the received_packets should be computed
+    :nodes: the indices(positions) of the nodes, will be computed, if not given, so
+    default value is None
 
     :returns: an ndarray containing the number of received packets in each item
 
     """
 
-    #number of received packets
+    # number of received packets
+    # is initialized with this number, because connections to itself do not count, but
+    # will be counted in the algorithm, so they are subtracted before to equalize it.
     num_received_packets = -config.IND_LEN
 
-    #array for indices of node positions
-    if nodes==None:
+    # array for indices of node positions
+    # computes the positions of the nodes, if they are not given
+    if nodes is None:
         nodes = np.nonzero(individual)[0]
 
-    #build the Graph to store the nodes
+    # build the Graph to store the nodes
     g = build_graph(nodes)
 
-    #add probe node to graph
+    # add probe node to graph
     probe_node = g.add_vertex()
     # probe node iterates over grid. Probe node is added to graph, reachable vertexes are
     # computed and summed up
@@ -177,7 +182,7 @@ def graph_received_packets(individual, nodes=None):
         num_received_packets += sum(labeling.a)
         g.clear_vertex(probe_node)
 
-    #otherwise something totally wrong
+    # otherwise something totally wrong
     assert num_received_packets >= 0
 
     return num_received_packets
