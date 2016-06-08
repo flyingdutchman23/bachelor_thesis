@@ -191,11 +191,3 @@ def gen_error_message(message, arg):
     message += 'the type is: ' + str(type(arg))
 
     return message
-
-class Config:
-
-    """Class to get the config"""
-
-    def __init__(self):
-        """does nothing """
-        pass
