@@ -76,6 +76,8 @@ COVERAGE_MAX_LEVEL = None
 FILENAME = None
 # the stepsize, which is used in the RaLaNS file
 STEPSIZE = None
+# the file, which contains the actual result txt file in the zip file.
+RaLaNS_RESFILE = None
 
 # the constant for area
 AREA = 2
@@ -170,6 +172,8 @@ def fill_config(configfile):
         COVERAGE_LEVEL = ralans_config['coverageLevel']
         COVERAGE_MAX_LEVEL = ralans_config['coverageMaxLevel']
         MAX_DIST = ralans_config['maxRange']
+        shutil.copyfile(ralans_configfile, FOLDER+'ralans.cfg')
+        RaLaNS_RESFILE = resfile
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
