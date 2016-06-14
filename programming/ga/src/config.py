@@ -10,6 +10,10 @@ import shutil
 from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 # to open zipfiles to read RaLaNS data
 import zipfile
+# to parse the header of the RaLaNS result file
+import io
+from port3_ralans.src.util.parseResFile import parseHead, conv_byte_to_str, \
+        parseTransmitterHeader
 # to parse config file
 import configobj
 # to validate config file
@@ -161,19 +165,68 @@ def fill_config(configfile):
         if PLACEMENT_TYPE == LIST:
             IND_LEN = len(POSITIONS)
         else:
+            # if it is a cubic or an area, then the length is just the product of the
+            # length in each dimension
             IND_LEN = np.prod(LENG)
             print('IND_LEN in config: ',IND_LEN)
 
     elif TYPE == 1:
         FILENAME = config['data']['ralans']['FILENAME']
+        THRESHOLD = config['data']['ralans']['THRESHOLD']
+
         resfile, bdfile, ralans_configfile = getFiles(FILENAME)
+
         ralans_config = parseConfigFile(ralans_configfile, isZip=True)
         STEPSIZE = ralans_config['stepSize']
         COVERAGE_LEVEL = ralans_config['coverageLevel']
         COVERAGE_MAX_LEVEL = ralans_config['coverageMaxLevel']
         MAX_DIST = ralans_config['maxRange']
-        shutil.copyfile(ralans_configfile, FOLDER+'ralans.cfg')
+
+        # to read the header of the result RaLaNS file
+        first_line = None
+        print('MAX_DIST: ', MAX_DIST)
+        print('STEPSIZE: ', STEPSIZE)
+        print('COVERAGE_LEVEL', COVERAGE_LEVEL)
+        print('COVERAGE_MAX_LEVEL', COVERAGE_MAX_LEVEL)
+        print('resfile: ', resfile)
+        first_line = conv_byte_to_str(resfile.readline())
+
+        headtr = np.loadtxt(io.StringIO(first_line), delimiter=" ")
+        PLACEMENT_TYPE = headtr[0]
+        BORDERS, stepsizes, height, length = parseHead(headtr, PLACEMENT_TYPE)
+        if PLACEMENT_TYPE == AREA or PLACEMENT_TYPE == CUBIC:
+            assert height[0] == COVERAGE_LEVEL
+            assert height[1] == COVERAGE_MAX_LEVEL
+            LENG = length
+
+            # set the stepsize according to the PLACEMENT_TYPE
+            if PLACEMENT_TYPE == AREA:
+                assert stepsizes[0] == stepsizes[1]
+                STEPSIZE = stepsizes[0]
+            elif PLACEMENT_TYPE == CUBIC:
+                assert stepsizes[0] == stepsizes[1] == stepsizes[2]
+                STEPSIZE = stepsizes[0]
+
+            # maybe also good to have for the AREA and CUBIC
+            POSITIONS = parseTransmitterHeader(headtr)
+
+            # if placement type is cubic or area, then the lenght of an individual is just
+            # the multiplicaion of the length in each axis
+
+            print('LENG: ', LENG)
+            assert len(LENG) == 3
+            IND_LEN = LENG[0] * LENG[1] * LENG[2]
+            assert IND_LEN == len(POSITIONS)
+
+        elif PLACEMENT_TYPE == LIST:
+            IND_LEN = length
+            POSITIONS = parseTransmitterHeader(headtr)
+
+
+        # save the config file of RaLaNS in the result folder as well.
+        # shutil.copyfile(ralans_configfile.name, FOLDER+'ralans.cfg')
         RaLaNS_RESFILE = resfile
+        ralans_configfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
