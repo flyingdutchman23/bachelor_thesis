@@ -148,6 +148,8 @@ def fill_config(configfile):
 
     global TYPE, MAX_DIST, BORDERS, REAL_DIST_CELL, PLACEMENT_TYPE, STEPSIZE
     global COVERAGE_LEVEL, COVERAGE_MAX_LEVEL, LENG, POSITIONS, IND_LEN
+    global FILENAME, THRESHOLD
+
     TYPE = int(config['data']['TYPE'])
     print('type init: ',type(INIT))
 
@@ -183,7 +185,6 @@ def fill_config(configfile):
             print('IND_LEN in config: ',IND_LEN)
 
     elif TYPE == RALANS:
-        global FILENAME, THRESHOLD
         FILENAME = config['data']['ralans']['FILENAME']
         print('filename in config: ', FILENAME)
         print('type filename in config: ', type(FILENAME))
@@ -193,6 +194,7 @@ def fill_config(configfile):
 
         ralans_config = parseConfigFile(ralans_configfile, isZip=True)
         STEPSIZE = ralans_config['stepSize']
+        REAL_DIST_CELL = STEPSIZE
         COVERAGE_LEVEL = ralans_config['coverageLevel']
         COVERAGE_MAX_LEVEL = ralans_config['coverageMaxLevel']
         MAX_DIST = ralans_config['maxRange']
