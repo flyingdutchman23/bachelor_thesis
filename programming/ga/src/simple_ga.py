@@ -40,6 +40,7 @@ import print_helper
 import init_functions as inits
 import mate_functions as mates
 import mutate_functions as mutates
+import ralans_wrapper as ralans
 
 
 toolbox = base.Toolbox()
@@ -57,7 +58,6 @@ def init():
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
-    print('init', config.INIT)
     # Choose init function
     if config.INIT == 0:
         toolbox.register("init", inits.normal_random)
@@ -84,7 +84,8 @@ def init():
     
     #which functions to use for specific part of ga
     if config.FITNESS == 0:
-        toolbox.register("evaluate", spne.graph_dist_evaluate)
+        ralans.init()
+        toolbox.register("evaluate", spne.graph_evaluate)
     elif config.FITNESS == 1:
         sys.exit('this option is not implemented yet!')
     else:

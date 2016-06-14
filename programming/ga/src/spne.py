@@ -15,38 +15,23 @@ import graph_tool.all as gt
 import my_util
 #to evaluate with RaLaNS
 from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
+import ralans_wrapper as ralans
 
-### Currently the calculation is just based on the distance between the cells and the
-### RaLANS calculation will be added soon
+def packet_received(ind_index, probe_index):
+    """checks whether there is a connection from the probe node to the node in the
+    individual and returns the result as boolean. Handles the RaLaNS and the prototype way
+    of calculation by calling the right function based on the config.
+    :returns: True, if there is a connection.
+              False, if there is no connection.
 
-def ralans_packet_received(node_index=1, filename=config.FILENAME, height=config.COVERAGE_LEVEL, 
-        stepsize=config.STEPSIZE, isZip=True):
-    """calculates whether the given node can connect to another cell on the map. It
-    calculates the signal strength to every cell in the grid.
-
-    :node_index: the index of the node
-    :filename: the path to the RaLaNS file. It has to be a zip file.
-    :returns: true, if there is a connection from node 1 to node 2.
-            false, else.
     """
-
-    # TODO open file at correct position, so that it is just done ones
-
-    resfile = filename
-    config = None
-    if isZip:
-        resfile, bdfile, configfile = getFiles(filename)
-        config = parseConfigFile(configfile, isZip=isZip)
-
-    # TODO change encoding of pint in grid
-    requestedTransmitter = my_util.onedpos_to_2dpos(node_index)
-    requestedTransmitter.append(height)
-    res, borders, transmitter, stp = parseResFile.parseResFile(resfile, 
-            requestedTransmitter, stepsize, isZip=isZip)
-    print(res.shape)
     
+    if config.TYPE == config.PROTOTYPE:
+        return prototype_packet_received(ind_index, probe_index)
+    else:
+        return ralans.packet_received_by_id(ind_index, probe_index)
 
-def packet_received(ind_index,probe_index):
+def prototype_packet_received(ind_index,probe_index):
     """decides wheither a packet from the index in the individual, so the node, reaches
     the probe node, which has the index probe_index. Therefore it calculates the distance
     and compares that to the maximum allowed distance. The function returns true, if the
@@ -89,7 +74,7 @@ def received_packets(individual):
     #TODO probably performance improvable
     for node_index in nodes:
         for probe_index in range(len(individual)):
-            if packet_received(node_index,probe_index) == True:
+            if packet_received(node_index,probe_index):
                 rec_packs[probe_index] += 1
 
 
@@ -98,49 +83,6 @@ def received_packets(individual):
     # plot_helper.map(rec_packs,"received packets")
     # nodes_radius_plot(rec_packs,individual,"nodes with radius")
     return rec_packs, len(nodes)
-
-
-def dist_evaluate(individual):
-    """
-    computes the value of the SPNE metric for the given individual based on the distance.
-
-    :individual: the individual, for which SPNE as its fitness should calculated
-
-    :returns: the numeric value of the SPNE metric as a float
-
-    """
-
-    #if there are no nodes, it can be divided by zero!
-    #The result should be 0, if there are no nodes, of course
-    #do it as an assertion, because it will assured in an init function later on
-    assert sum(individual) > 0
-    spne = 0
-    rec_packs, nodes = received_packets(individual)
-    spne = sum(rec_packs)
-    spne /= (nodes * config.LENG[1] * config.LENG[0])
-
-    return spne,
-
-def build_graph(nodes):
-    """builds the graph for the individual with the given positions of the nodes
-
-    :nodes: an iterable of the positions of the nodes
-    :returns: the Graph object
-
-    """
-    g = gt.Graph(directed=False)
-
-    num_of_nodes = len(nodes)
-    g.add_vertex(num_of_nodes)
-
-    #build Graph by adding an edge between the nodes, which are connected
-    for node_index1, node1 in enumerate(nodes):
-        for node_index2 in range((node_index1+1),num_of_nodes):
-            node2 = nodes[node_index2]
-            if node_index1 != node_index2 and packet_received(node1,node2) == True:
-                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
-
-    return g
 
 def graph_received_packets(individual, nodes=None):
     """
@@ -187,10 +129,33 @@ def graph_received_packets(individual, nodes=None):
 
     return num_received_packets
 
-def graph_dist_evaluate(individual):
+def build_graph(nodes):
+    """builds the graph for the individual with the given positions of the nodes
+
+    :nodes: an iterable of the positions of the nodes
+    :returns: the Graph object
+
+    """
+    g = gt.Graph(directed=False)
+
+    num_of_nodes = len(nodes)
+    g.add_vertex(num_of_nodes)
+
+    #build Graph by adding an edge between the nodes, which are connected
+    for node_index1, node1 in enumerate(nodes):
+        for node_index2 in range((node_index1+1),num_of_nodes):
+            node2 = nodes[node_index2]
+            if node_index1 != node_index2 and packet_received(node1,node2) == True:
+                g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
+
+    return g
+
+def graph_evaluate(individual):
     """
 
-    computes the value of the SPNE metric for the given individual based on the distance.
+    computes the value of the SPNE metric for the given individual based on the distance
+    or the RaLaNS data. Which data(distance or RaLaNS) is used is specified in the config 
+    module.
 
     :individual: the individual, for which SPNE as its fitness should calculated
 
@@ -210,16 +175,3 @@ def graph_dist_evaluate(individual):
     assert spne >= 0
 
     return spne,
-
-def ralans_evaluate(individual):
-    """
-    computes the value of the SPNE metric for the given individual based on the data from
-    RaLaNS
-
-    :individual: the individual, for which SPNE as its fitness should calculated
-
-    :returns: the numeric value of the SPNE metric as a float
-
-    """
-    #TODO write the function
-    return 0.0

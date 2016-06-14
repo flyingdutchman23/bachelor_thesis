@@ -1,6 +1,6 @@
 #File to keep some mutate functions
 
-from config import IND_LEN
+import config
 
 import numpy as np
 
@@ -25,7 +25,7 @@ def lochert_mutate_one(individual):
     individual[flip_pos] = 0
 
     #flip a 0 to a 1
-    zeros = np.delete(np.arange(IND_LEN),nonzeros)
+    zeros = np.delete(np.arange(config.IND_LEN),nonzeros)
     flip_pos = random.choice(zeros)
     individual[flip_pos] = 1
 

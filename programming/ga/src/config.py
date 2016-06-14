@@ -90,6 +90,18 @@ CUBIC = 3
 # the constant for list
 LIST = 4
 
+# to specify which axes refers to which number
+# the x axis
+XAXIS = 0
+# the y axis
+YAXIS = 1
+# the z axis
+ZAXIS = 2
+
+# compare values for the prototype and RaLaNS
+RALANS = 1
+PROTOTYPE = 0
+
 #so every saved plot in 1 run has same time
 START_TIME = time.time()
 START_TIME_STR = str(int(START_TIME))
@@ -139,7 +151,7 @@ def fill_config(configfile):
     TYPE = int(config['data']['TYPE'])
     print('type init: ',type(INIT))
 
-    if TYPE == 0:
+    if TYPE == PROTOTYPE:
         MAX_DIST = config['data']['prototype']['MAX_DIST']
         BORDERS = config['data']['prototype']['BORDERS']
         print('borders',BORDERS)
@@ -170,8 +182,11 @@ def fill_config(configfile):
             IND_LEN = np.prod(LENG)
             print('IND_LEN in config: ',IND_LEN)
 
-    elif TYPE == 1:
+    elif TYPE == RALANS:
+        global FILENAME, THRESHOLD
         FILENAME = config['data']['ralans']['FILENAME']
+        print('filename in config: ', FILENAME)
+        print('type filename in config: ', type(FILENAME))
         THRESHOLD = config['data']['ralans']['THRESHOLD']
 
         resfile, bdfile, ralans_configfile = getFiles(FILENAME)
@@ -190,6 +205,10 @@ def fill_config(configfile):
         print('COVERAGE_MAX_LEVEL', COVERAGE_MAX_LEVEL)
         print('resfile: ', resfile)
         first_line = conv_byte_to_str(resfile.readline())
+        second_line = conv_byte_to_str(resfile.readline())
+        assert first_line == second_line, \
+                "Currently just files with the same receiver \
+                and transmitter can be parsed"
 
         headtr = np.loadtxt(io.StringIO(first_line), delimiter=" ")
         PLACEMENT_TYPE = headtr[0]
@@ -223,10 +242,16 @@ def fill_config(configfile):
             POSITIONS = parseTransmitterHeader(headtr)
 
 
+        # TODO find a way to copy
         # save the config file of RaLaNS in the result folder as well.
         # shutil.copyfile(ralans_configfile.name, FOLDER+'ralans.cfg')
-        RaLaNS_RESFILE = resfile
+
+
+        # TODO not sure whether to store it or not
+        # RaLaNS_RESFILE = resfile
         ralans_configfile.close()
+        resfile.close()
+        bdfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
