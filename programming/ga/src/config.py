@@ -108,12 +108,38 @@ PROTOTYPE = 0
 START_TIME = time.time()
 START_TIME_STR = str(int(START_TIME))
 
-#to save plots in that folder
-FOLDER = "../results/" + "ga_run_" + START_TIME_STR + "/"
-if not os.path.exists(FOLDER):
-    os.makedirs(FOLDER)
-else:
-    sys.exit('save folder exists already, it should not!')
+def get_placement_name(placement_type=PLACEMENT_TYPE):
+    """returns the name of the type of this placement. It is either 'AREA', 'CUBIC' or
+    'LIST'. 
+
+    :placement_type: the number, which describes this placement type.
+    :returns: the name of the placement as a string
+
+    """
+    if placement_type == AREA:
+        return 'AREA'
+    elif placement_type == CUBIC:
+        return 'CUBIC'
+    elif placement_type == LIST:
+        return 'LIST'
+    else:
+        sys.exit(gen_error_message('incorrect PLACEMENT_TYPE: ', placement_type))
+
+def create_result_folder(type_name, placement_name, ind_len):
+    """creates the folder, in which the result files will be placed.
+
+    """
+    global FOLDER
+    FOLDER = "../results/" + "ga_run" + "/"
+    FOLDER += type_name + "/"
+    FOLDER += placement_name + "/"
+    FOLDER += "LEN_" + str(ind_len) + "/"
+    FOLDER += "time_" + START_TIME_STR + "/"
+    if not os.path.exists(FOLDER):
+        os.makedirs(FOLDER)
+    else:
+        sys.exit(gen_error_message('save folder exists already, \
+                it should not! The folder is: ', FOLDER))
 
 def fill_config(configfile):
     """
@@ -124,9 +150,6 @@ def fill_config(configfile):
     :returns: None
 
     """
-
-    # save a copy of the configfile in the result folder as well
-    shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
     configspec = configobj.ConfigObj(CONFIGSPECFILE, list_values=False)
     config = configobj.ConfigObj(configfile, configspec=configspec, list_values=True)
@@ -156,6 +179,7 @@ def fill_config(configfile):
     print('type init: ',type(INIT))
 
     if TYPE == PROTOTYPE:
+        TYPE_NAME = 'prototype'
         MAX_DIST = config['data']['prototype']['MAX_DIST']
         BORDERS = config['data']['prototype']['BORDERS']
         print('borders',BORDERS)
@@ -187,6 +211,7 @@ def fill_config(configfile):
             print('IND_LEN in config: ',IND_LEN)
 
     elif TYPE == RALANS:
+        TYPE_NAME = 'ralans'
         FILENAME = config['data']['ralans']['FILENAME']
         print('filename in config: ', FILENAME)
         print('type filename in config: ', type(FILENAME))
@@ -268,6 +293,11 @@ def fill_config(configfile):
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
+
+    create_result_folder(TYPE_NAME, get_placement_name(PLACEMENT_TYPE), IND_LEN)
+
+    # save a copy of the configfile in the result folder as well
+    shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
     assert len(BORDERS) == 4
     # TODO calculates the number of rows and columns
