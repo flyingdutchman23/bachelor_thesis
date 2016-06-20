@@ -68,7 +68,8 @@ def read_resultfile(filename, isZip=True):
     print('config.IND_LEN: ', config.IND_LEN)
     print('config.LENG: ', config.LENG)
 
-    assert config.PLACEMENT_TYPE in [config.CUBIC, config.AREA], "Only AREA and CUBIC for testing!"
+    # assert config.PLACEMENT_TYPE in [config.CUBIC, config.AREA], \
+            # "Only AREA and CUBIC for testing!"
 
     # init the big signals arrays with NaN values to see mistakes quicker
     # this array just allows files, which have the same transmitters as receivers
@@ -76,7 +77,13 @@ def read_resultfile(filename, isZip=True):
     signals = np.NAN * np.empty((config.IND_LEN, config.IND_LEN))
 
 
-    if config.PLACEMENT_TYPE in [config.CUBIC, config.AREA]:
+    if config.PLACEMENT_TYPE in [config.CUBIC, config.AREA, config.LIST]:
+
+        if config.PLACEMENT_TYPE == config.LIST:
+            borders = parseBorders(f.readline())
+            print("border in result: ", borders)
+            assert len(borders) == 4
+            config.BORDERS = borders
 
         trid = 0
         cur_trans_signals = []
@@ -89,7 +96,9 @@ def read_resultfile(filename, isZip=True):
                     "There are more transmitters in the file than apparently specified"
 
             line = conv_byte_to_str(line)
-            cur_trans_signals.extend(np.loadtxt(io.StringIO(line), delimiter=" ").tolist())
+            new_signals = np.loadtxt(io.StringIO(line), delimiter=" ").tolist()
+            assert len(new_signals) == config.LENG[config.XAXIS]
+            cur_trans_signals.extend(new_signals)
             receiver_count += 1
 
 
@@ -101,8 +110,8 @@ def read_resultfile(filename, isZip=True):
             for that tranmitter               
             """
             if receiver_count == config.LENG[config.YAXIS] * config.LENG[config.ZAXIS]:
-                # print('len signals 1 trans: ', len(signals[trid]))
-                # print('len cur trans signals: ', len(cur_trans_signals))
+                print('len signals 1 trans: ', len(signals[trid]))
+                print('len cur trans signals: ', len(cur_trans_signals))
                 assert len(signals[trid]) == len(cur_trans_signals)
                 signals[trid][:] = cur_trans_signals 
                 cur_trans_signals = []
@@ -112,39 +121,6 @@ def read_resultfile(filename, isZip=True):
         check = np.array([signal == np.NAN for signal in signals])
         assert not check.any(), \
             "Some field in the signals array was not filled"
-
-        # # What is sy?
-        # sy = leng[1]
-        # # how many layers it has
-        # layers = config.LENG[2]
-
-        # start = sy * layers * trid
-        # off = layer * sy
-
-        # for i, l in enumerate(f):
-            # if i < start + off:
-                # continue
-            # elif start + off <= i < start + off + sy:
-                # if len(l.strip()) > 0:
-                    # l = conv_byte_to_str(l)
-                    # res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            # else:
-                # break
-
-    elif config.PLACEMENT_TYPE in [config.LIST]:
-        borders_ = parseBorders(f.readline())
-        if t == config.LIST:
-            borders = borders_
-        print("line,", borders)
-        for i, l in enumerate(f):
-            if i < trid:
-                continue
-            elif i == trid:
-                if len(l.strip()) > 0:
-                    l = conv_byte_to_str(l)
-                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            else:
-                break
     else:
         sys.exit('The type has to be CUBIC, AREA or LIST!')
 
@@ -248,100 +224,6 @@ def conv_byte_to_str(line):
         line = line.decode('utf8')
     return line
 
-
-def myparseResFile(filename, trid, stepsize=1, requestedLayer=None, isZip=True):
-
-    if isZip:
-        f = filename
-    else:
-        f = open(filename)
-
-
-    if DEBUG: print("Id of selected transmitter: ", trid)
-
-    line = conv_byte_to_str(f.readline())
-    line = conv_byte_to_str(f.readline())
-
-    headrec = np.loadtxt(io.StringIO(line), delimiter=" ")
-    t = int(headrec[0])
-    borders, stp, height, leng = parseHead(headrec, t)
-
-    if DEBUG: print("bd, steps, height, len:", borders, stp, height, leng)
-
-    if requestedLayer is not None:
-        try:
-            requestedLayer = int(requestedLayer)
-            layer = leng[2]
-            if layer < requestedLayer or requestedLayer == 0:
-                print("This file has only ", layer, "layers. Using first one.")
-                layer = 0
-            else:
-                layer = requestedLayer - 1  # we dont need the offset for the first layer
-        except ValueError:
-            layer = 0
-            print("invalid layer")
-    else:
-        print("No layer given, using first one.", type(requestedLayer))
-        layer = 0
-    print("Displaying transmitter:", transmitters[trid])
-    print("Displaying layer:", layer + 1)
-
-    res = []
-
-    if t in [config.CUBIC, config.AREA]:
-        sy = leng[1]
-        layers = leng[2]
-
-        start = sy * layers * trid
-        off = layer * sy
-
-        if DEBUG: print(sy, layer, trid, start, off)
-        if DEBUG: print(start + off, start + off + sy)
-        for i, l in enumerate(f):
-            if i < start + off:
-                continue
-            elif start + off <= i < start + off + sy:
-                if len(l.strip()) > 0:
-                    l = conv_byte_to_str(l)
-                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            else:
-                break
-
-    if t in [config.LIST]:
-        borders_ = parseBorders(f.readline())
-        if t == config.LIST:
-            borders = borders_
-        print("line,", borders)
-        for i, l in enumerate(f):
-            if i < trid:
-                continue
-            elif i == trid:
-                if len(l.strip()) > 0:
-                    l = conv_byte_to_str(l)
-                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            else:
-                break
-
-    f.close()
-
-    # res = parseArea(input)
-    if DEBUG: print("Längen:", len(res), len(res[0]))
-    # print res
-
-
-    # TODO maybe include this, but it will be handled anyway
-    # for y in range(0, len(res)):
-        # for x in range(0, len(res[y])):
-            # if res[y][x] < -1000:
-                # res[y][x] = np.inf
-
-    res = np.array(res)
-    print('res: ')
-    print(res)
-
-    return res
-
-
 def parseHead(head, type):
     stp = [0, 0, 1]
     leng = [0, 0, 1]
@@ -377,4 +259,6 @@ def parseHead(head, type):
 
 
 def parseBorders(input):
-    return np.genfromtxt(io.StringIO(input.strip()), delimiter=" ").tolist()
+    print('input: ', input)
+    input = conv_byte_to_str(input)
+    return np.loadtxt(io.StringIO(input.strip()), delimiter=" ").tolist()

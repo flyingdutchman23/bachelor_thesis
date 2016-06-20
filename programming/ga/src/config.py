@@ -6,6 +6,8 @@ import time
 import os
 # to copy a file
 import shutil
+# to round a float number for checking to convert to integer
+import math
 # to parse the RaLaNS config
 from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 # to open zipfiles to read RaLaNS data
@@ -240,8 +242,17 @@ def fill_config(configfile):
             assert IND_LEN == len(POSITIONS)
 
         elif PLACEMENT_TYPE == LIST:
-            IND_LEN = length
+            if math.floor(length) == int(length):
+                IND_LEN = int(length)
+            else:
+                sys.exit(gen_error_message('error for IND_LEN cast to int: ', IND_LEN))
             POSITIONS = parseTransmitterHeader(headtr)
+            print('length: ', length)
+            print('POSITIONS: ', POSITIONS)
+            assert IND_LEN == len(POSITIONS)
+            LENG[XAXIS] = len(POSITIONS)
+            LENG[YAXIS] = 1
+            LENG[ZAXIS] = 1
 
 
         # TODO find a way to copy

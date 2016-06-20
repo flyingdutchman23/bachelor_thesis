@@ -12,13 +12,16 @@ import spne
 import graph_tool.all as gt
 import init_functions as init
 import my_util
+import ralans_wrapper as ralans
 
 ###helper module to plot specific states and results
 
 def draw_individual_graph(individual,name):
 
     MAX_WINDOW = 1000
-    output_size = (80 * config.LENG[0], 80 * config.LENG[1])
+    size_x = config.BORDERS[2] - config.BORDERS[0]
+    size_y = config.BORDERS[3] - config.BORDERS[1]
+    output_size = (80 * size_x, 80 * size_y)
 
     #to keep the relation of the window and to keep the size smaller than MAX_WINDOW
     if max(output_size) > MAX_WINDOW:
@@ -38,12 +41,14 @@ def draw_individual_graph(individual,name):
     positions = g.new_vertex_property("vector<double>")
     for node_index in range(len(nodes)):
         pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
-        pos =  (pos[1] * output_size[0] / config.LENG[0],
-                output_size[1] - (pos[0] * output_size[1] / config.LENG[1]))
+        # pos =  (pos[1] * output_size[0] / config.LENG[0],
+                # output_size[1] - (pos[0] * output_size[1] / config.LENG[1]))
         positions[g.vertex(node_index)] = pos
 
 
     name += ".png"
+    print('FOLDER: ', config.FOLDER)
+    print('name: ', name)
     gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=18, 
             output=config.FOLDER+name, output_size=output_size)
 
@@ -80,7 +85,7 @@ def avg_min_max(logbook,save=True,to_show=True):
 def map(data,name,save=True,to_show=True,description=""):
     #clear last figure, if it exists
     plt.clf()
-    values = np.reshape(data,(config.LENG[1],config.LENG[0]))
+    values = np.reshape(data,(config.LENG[config.YAXIS],config.LENG[config.XAXIS]))
 
     plt.gcf().add_axes((0.2,0.2,0.7,0.7))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
@@ -103,7 +108,7 @@ def map(data,name,save=True,to_show=True,description=""):
         plt.show()
 
 def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=True,
-        description="", add_circles=True, add_grid=True):
+        description="", add_circles=False, add_grid=False):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -114,10 +119,14 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     #make correct relation of width and height in plot
     left = 0.2
     bottom = 0.2
-    if config.LENG[1] > config.LENG[0]:
-        left += (0.9 - left) * (1 - config.LENG[0] / config.LENG[1])
-    elif config.LENG[0] > config.LENG[1]:
-        bottom += (0.9 - bottom) * (1 - config.LENG[1] / config.LENG[0])
+
+    size_x = config.BORDERS[2] - config.BORDERS[0]
+    size_y = config.BORDERS[3] - config.BORDERS[1]
+
+    if size_y > size_x:
+        left += (0.9 - left) * (1 - size_x / size_y)
+    elif size_x > size_y:
+        bottom += (0.9 - bottom) * (1 - size_y / size_y)
 
     print("left, bottom: ",left,bottom)
     fig.add_axes((left,bottom, 0.9 - left, 0.9 - bottom))
@@ -125,27 +134,38 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     rows = []
     cols = []
 
-    values = np.reshape(individual,(config.LENG[1],config.LENG[0]))
 
-    for index, gen in np.ndenumerate(values):
+    for index, gen in enumerate(individual):
         if gen == 1:
-            rows.append(index[0] * config.REAL_DIST_CELL)
-            cols.append(index[1] * config.REAL_DIST_CELL)
-            if add_circles:
-                circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
-                    radius=config.MAX_DIST, color='r',fill=False)
-                fig.gca().add_artist(circle)
-                fig.gca().plot(index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL)
+            transmitter = config.POSITIONS[index]
+            print('transmitter: ', transmitter)
+            rows.append(transmitter[config.XAXIS])
+            cols.append(transmitter[config.YAXIS])
+
+    # values = np.reshape(individual,(config.LENG[1],config.LENG[0]))
+
+    # for index, gen in np.ndenumerate(values):
+        # if gen == 1:
+            # transmitter = config.POSITIONS[index]
+            # rows.append(index[0] * config.REAL_DIST_CELL)
+            # cols.append(index[1] * config.REAL_DIST_CELL)
+            # if add_circles:
+                # circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
+                    # radius=config.MAX_DIST, color='r',fill=False)
+                # fig.gca().add_artist(circle)
+                # fig.gca().plot(index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL)
 
     fig.gca().scatter(cols,rows)
-    fig.gca().set_ylim([-0.5,config.LENG[1]-0.5])
-    fig.gca().set_xlim([-0.5,config.LENG[0]-0.5])
+    # fig.gca().set_ylim([config.BORDERS[1],config.BORDERS[3]])
+    # fig.gca().set_xlim([config.BORDERS[0],config.BORDERS[2]])
+    # fig.gca().set_ylim([-0.5,config.LENG[1]-0.5])
+    # fig.gca().set_xlim([-0.5,config.LENG[0]-0.5])
 
     if add_grid:
         fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
         fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
         fig.gca().grid(True,linestyle='solid')
-    fig.suptitle(name)
+    fig.suptitle('Scatter Plot' + name)
 
     #add description
     if print_fitness:

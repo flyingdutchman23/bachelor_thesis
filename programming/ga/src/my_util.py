@@ -10,7 +10,9 @@ def onedpos_to_2dpos(pos):
 
     """
 
-    pos_row = int(pos / config.LENG[0])
-    pos_col = pos % config.LENG[0]
+    pos = config.POSITIONS[pos]
 
-    return [pos_row, pos_col]
+    assert len(pos) == 3
+    pos = pos[:2]
+
+    return pos

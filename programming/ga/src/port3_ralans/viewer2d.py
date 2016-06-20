@@ -50,24 +50,24 @@ def getFiles(zipf):
         print("No polygon-file found! Will not draw a map.")
 
     rechead = 0
-    for i, l in enumerate(resfile):
-        print("index: ",i," content: ", l)
-        if i == 1:
-            rechead = int(chr(l[0]))
-            break
-    resfile.close()
-    resfile = zf.open(rf)
+    # for i, l in enumerate(resfile):
+        # print("index: ",i," content: ", l)
+        # if i == 1:
+            # rechead = int(chr(l[0]))
+            # break
+    # resfile.close()
+    # resfile = zf.open(rf)
 
     zf.close()
 
-    print("rechead",rechead)
-    if rechead == 1:
-        print("Lines are not supported yet.\n Use 1d-Viewer to display the signal strength trend.")
-    if rechead == 4:
-        print("Please use viewerScattered.py for 'lists'.")
-    if rechead not in [2, 3]:
-        print("Only 'area' and 'cubic' are supported simulationtypes for this viewer.")
-        sys.exit()
+    # print("rechead",rechead)
+    # if rechead == 1:
+        # print("Lines are not supported yet.\n Use 1d-Viewer to display the signal strength trend.")
+    # if rechead == 4:
+        # print("Please use viewerScattered.py for 'lists'.")
+    # if rechead not in [2, 3]:
+        # print("Only 'area' and 'cubic' are supported simulationtypes for this viewer.")
+        # sys.exit()
 
     return resfile, bdfile, configfile
 
