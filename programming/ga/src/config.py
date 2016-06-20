@@ -282,19 +282,24 @@ def fill_config(configfile):
 
         # TODO find a way to copy
         # save the config file of RaLaNS in the result folder as well.
-        # shutil.copyfile(ralans_configfile.name, FOLDER+'ralans.cfg')
 
 
         # TODO not sure whether to store it or not
         # RaLaNS_RESFILE = resfile
-        ralans_configfile.close()
         resfile.close()
         bdfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
-
     create_result_folder(TYPE_NAME, get_placement_name(PLACEMENT_TYPE), IND_LEN)
+
+
+    # save the config of RaLaNS
+    if TYPE == RALANS:
+        zf = zipfile.ZipFile(FILENAME,'r')
+        zf.extract('config.cfg',FOLDER)
+        ralans_configfile.close()
+
 
     # save a copy of the configfile in the result folder as well
     shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
