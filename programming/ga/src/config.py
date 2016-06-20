@@ -8,20 +8,19 @@ import os
 import shutil
 # to round a float number for checking to convert to integer
 import math
-# to parse the RaLaNS config
-from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 # to open zipfiles to read RaLaNS data
 import zipfile
-# to parse the header of the RaLaNS result file
-import io
-from port3_ralans.src.util.parseResFile import parseHead, conv_byte_to_str, \
-        parseTransmitterHeader
 # to parse config file
 import configobj
 # to validate config file
 from validate import Validator
 # to do multiplication
 import numpy as np
+
+import io
+
+# contains verious functions to deal with the RaLaNS data
+import ralans_helper
 
 CONFIGSPECFILE = "./genetic_algorithm_specifications.cfg"
 ###Global Constants
@@ -85,12 +84,11 @@ STEPSIZE = None
 # the file, which contains the actual result txt file in the zip file.
 RaLaNS_RESFILE = None
 
-# the constant for area
-AREA = 2
-# the constant for cubic
-CUBIC = 3
-# the constant for list
-LIST = 4
+# copy constants for RaLaNS placement types
+POINT = ralans_helper.POINT
+AREA = ralans_helper.AREA
+CUBIC = ralans_helper.CUBIC
+LIST = ralans_helper.LIST
 
 # to specify which axes refers to which number
 # the x axis
@@ -217,9 +215,9 @@ def fill_config(configfile):
         print('type filename in config: ', type(FILENAME))
         THRESHOLD = config['data']['ralans']['THRESHOLD']
 
-        resfile, bdfile, ralans_configfile = getFiles(FILENAME)
+        resfile, ralans_configfile = ralans_helper.getFiles(FILENAME)
 
-        ralans_config = parseConfigFile(ralans_configfile, isZip=True)
+        ralans_config = ralans_helper.parseConfigFile(ralans_configfile, isZip=True)
         STEPSIZE = ralans_config['stepSize']
         REAL_DIST_CELL = STEPSIZE
         COVERAGE_LEVEL = ralans_config['coverageLevel']
@@ -233,15 +231,15 @@ def fill_config(configfile):
         print('COVERAGE_LEVEL', COVERAGE_LEVEL)
         print('COVERAGE_MAX_LEVEL', COVERAGE_MAX_LEVEL)
         print('resfile: ', resfile)
-        first_line = conv_byte_to_str(resfile.readline())
-        second_line = conv_byte_to_str(resfile.readline())
+        first_line = ralans_helper.conv_byte_to_str(resfile.readline())
+        second_line = ralans_helper.conv_byte_to_str(resfile.readline())
         assert first_line == second_line, \
                 "Currently just files with the same receiver \
                 and transmitter can be parsed"
 
         headtr = np.loadtxt(io.StringIO(first_line), delimiter=" ")
         PLACEMENT_TYPE = headtr[0]
-        BORDERS, stepsizes, height, length = parseHead(headtr, PLACEMENT_TYPE)
+        BORDERS, stepsizes, height, length = ralans_helper.parseHead(headtr, PLACEMENT_TYPE)
         if PLACEMENT_TYPE == AREA or PLACEMENT_TYPE == CUBIC:
             assert height[0] == COVERAGE_LEVEL
             assert height[1] == COVERAGE_MAX_LEVEL
@@ -256,7 +254,7 @@ def fill_config(configfile):
                 STEPSIZE = stepsizes[0]
 
             # maybe also good to have for the AREA and CUBIC
-            POSITIONS = parseTransmitterHeader(headtr)
+            POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
 
             # if placement type is cubic or area, then the lenght of an individual is just
             # the multiplicaion of the length in each axis
@@ -271,7 +269,7 @@ def fill_config(configfile):
                 IND_LEN = int(length)
             else:
                 sys.exit(gen_error_message('error for IND_LEN cast to int: ', IND_LEN))
-            POSITIONS = parseTransmitterHeader(headtr)
+            POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
             print('length: ', length)
             print('POSITIONS: ', POSITIONS)
             assert IND_LEN == len(POSITIONS)
@@ -287,7 +285,6 @@ def fill_config(configfile):
         # TODO not sure whether to store it or not
         # RaLaNS_RESFILE = resfile
         resfile.close()
-        bdfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 

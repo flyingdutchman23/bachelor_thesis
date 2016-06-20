@@ -22,18 +22,66 @@
 ########################################################################################################################
 import numpy as np
 import io
-from . import zipfile_
+import sys
+import zipfile
 
-from ..util.functions import frange
+# the name of the result file in RaLaNS
+RESULTFILENAME = 'result.txt'
+# the name of the config file in RaLaNS
+CONFIGFILENAME = 'config.cfg'
 
+# the constant for POINT
 POINT = 0
-LINE = 1
+# the constant for area
 AREA = 2
+# the constant for cubic
 CUBIC = 3
+# the constant for list
 LIST = 4
 
 DEBUG = 0
 
+def parseConfigFile(filename, isZip=True):
+    """
+    Parses a configfile as dictionary
+    :param filename: Filename
+    :param configfolder: Folder, which contains the configfile
+    :return: Dictionary containing all key-values pares of the file
+    """
+    config = {}
+
+    if isZip:
+        f = filename
+    else:
+        f = open(filename)
+
+    for line in f:
+        # print(line)
+        line = line.decode('utf8')
+        s = line.split("#")[0].split(" = ")
+        if len(s) > 1:
+            try:
+                config[s[0].strip()] = eval(s[1])
+            except:
+                config[s[0].strip()] = s[1].strip()
+
+    f.close()
+
+    return config
+
+def getFiles(zipf):
+
+    zf = zipfile.ZipFile(zipf, 'r')
+
+    RESULTFILENAME
+    CONFIGFILENAME
+
+    resfile = zf.open(RESULTFILENAME)
+    configfile = zf.open(CONFIGFILENAME)
+
+    zf.close()
+
+    return resfile, configfile
 
 def getTransmitters(filename, isZip=False):
     """
@@ -62,41 +110,22 @@ def getTransmitters(filename, isZip=False):
     return transmitters
 
 
-def getTransmitterID(reqTr, transmitters, stepsize=1, list=True):
-    print("Stepsize =", stepsize)
+def getTransmitterID(reqTr, transmitters, stepsize=1):
+
+    assert reqTr is not None
     trid = -1
-    i = 0
-    for tr in transmitters:
+
+    for i, tr in enumerate(transmitters):
         tr = np.array(tr)
-        if reqTr is None or np.linalg.norm(reqTr - tr) < stepsize / 2.:
-            if DEBUG and reqTr is not None:
-                print("found")
+        if np.linalg.norm(reqTr - tr) < stepsize / 2.:
             trid = i
             break
         i += 1
 
     if trid == -1:
         print("Transmitter not found")
-        trid = 0
 
-    if list:
-        for i, t in enumerate(transmitters):
-            print(i, t)
     return trid
-
-
-"""
-# Read in the file once and build a list of line offsets
-line_offset = []
-offset = 0
-for line in file:
-    line_offset.append(offset)
-    offset += len(line)
-file.seek(0)
-
-# Now, to skip to line n (with the first line being line 0), just do
-file.seek(line_offset[n])
-"""
 
 def conv_byte_to_str(line):
     """converts a readed line of bytes into a line, which is a string. if the line is
@@ -109,104 +138,6 @@ def conv_byte_to_str(line):
     if isinstance(line,bytes):
         line = line.decode('utf8')
     return line
-
-
-def parseResFile(filename, requestedTransmitter, stepsize=1, requestedLayer=None, isZip=False):
-    """
-    if type(filename) is zipfile.ZipExtFile:
-        f = filename
-    else:
-        f = open(filename)
-    """
-    if isZip:
-        f = filename
-    else:
-        f = open(filename)
-
-    line = conv_byte_to_str(f.readline())
-    print("type line: ", type(line))
-    headtr = np.loadtxt(io.StringIO(line), delimiter=" ")
-    # headtr = np.loadtxt(io.StringIO(testline), delimiter=" ")
-    print("headtr: ", headtr)
-    transmitters = parseTransmitterHeader(headtr)
-    print("Transmitters available: ", len(transmitters))
-    trid = getTransmitterID(requestedTransmitter, transmitters, stepsize)
-    if DEBUG: print("Id of selected transmitter: ", trid)
-
-    line = conv_byte_to_str(f.readline())
-    headrec = np.loadtxt(io.StringIO(line), delimiter=" ")
-    t = int(headrec[0])
-    borders, stp, height, leng = parseHead(headrec, t)
-    if DEBUG: print("bd, steps, height, len:", borders, stp, height, leng)
-
-    if requestedLayer is not None:
-        try:
-            requestedLayer = int(requestedLayer)
-            layer = leng[2]
-            if layer < requestedLayer or requestedLayer == 0:
-                print("This file has only ", layer, "layers. Using first one.")
-                layer = 0
-            else:
-                layer = requestedLayer - 1  # we dont need the offset for the first layer
-        except ValueError:
-            layer = 0
-            print("invalid layer")
-    else:
-        print("No layer given, using first one.", type(requestedLayer))
-        layer = 0
-    print("Displaying transmitter:", transmitters[trid])
-    print("Displaying layer:", layer + 1)
-
-    res = []
-
-    if t in [CUBIC, AREA]:
-        sy = leng[1]
-        layers = leng[2]
-
-        start = sy * layers * trid
-        off = layer * sy
-
-        if DEBUG: print(sy, layer, trid, start, off)
-        if DEBUG: print(start + off, start + off + sy)
-        for i, l in enumerate(f):
-            if i < start + off:
-                continue
-            elif start + off <= i < start + off + sy:
-                if len(l.strip()) > 0:
-                    l = conv_byte_to_str(l)
-                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            else:
-                break
-
-    if t in [LINE, LIST]:
-        borders_ = parseBorders(f.readline())
-        if t == LIST:
-            borders = borders_
-        print("line,", borders)
-        for i, l in enumerate(f):
-            if i < trid:
-                continue
-            elif i == trid:
-                if len(l.strip()) > 0:
-                    l = conv_byte_to_str(l)
-                    res.append(np.loadtxt(io.StringIO(l), delimiter=" ").tolist())
-            else:
-                break
-
-    f.close()
-
-    # res = parseArea(input)
-    if DEBUG: print("Längen:", len(res), len(res[0]))
-    # print res
-
-
-    for y in range(0, len(res)):
-        for x in range(0, len(res[y])):
-            if res[y][x] < -1000:
-                res[y][x] = np.inf
-
-    return np.array(res), borders, transmitters[trid], stp
-
 
 def parseHead(head, type):
     stp = [0, 0, 1]
@@ -222,7 +153,7 @@ def parseHead(head, type):
         leng[0] = int((borders[2] - borders[0]) / stp[0]) + 1
         leng[1] = int((borders[3] - borders[1]) / stp[1]) + 1
 
-    if type == CUBIC:
+    elif type == CUBIC:
         stp = head[7:]
         borders[:2] = head[1:3]
         borders[2:] = head[4:6]
@@ -232,23 +163,19 @@ def parseHead(head, type):
         leng[1] = int((borders[3] - borders[1]) / stp[1]) + 1
         leng[2] = int((height[1] - height[0]) / stp[2]) + 1
 
-    if type == POINT:
-        borders[:2] = head[1:3]
-        height[0] = head[3]
-
-    if type == LINE:
-        borders[:2] = head[1:3]
-        borders[2:] = head[4:6]
-        height[0] = head[3]
-        height[1] = head[6]
-        stp[2] = head[7]
-
-    if type == LIST:
+    elif type == LIST:
         leng = head[1]
         stp = head[2:]
+    else:
+        sys.exit('no correct result file from RaLaNS!')
+
 
     return borders, stp, height, leng
 
+def parseBorders(input):
+    print('input: ', input)
+    input = conv_byte_to_str(input)
+    return np.loadtxt(io.StringIO(input.strip()), delimiter=" ").tolist()
 
 def parseTransmitterHeader(head):
     print("header: ",head)
@@ -256,7 +183,7 @@ def parseTransmitterHeader(head):
     transmitterType = int(head[0])
 
     if transmitterType == POINT:
-        transmitters.append([head[1], head[2], head[3]])
+        sys.exit('POINT is not supported!!!')
 
     elif transmitterType == LIST:
 
@@ -273,19 +200,15 @@ def parseTransmitterHeader(head):
     # not very fast, but functional
     elif transmitterType == AREA:
         borders, stp, height, _ = parseHead(head, transmitterType)
-        for y in frange(borders[1], borders[3], stp[1]):
-            for x in frange(borders[0], borders[2], stp[0]):
+        for y in range(borders[1], borders[3], stp[1]):
+            for x in range(borders[0], borders[2], stp[0]):
                 transmitters.append([x, y, height[0]])
 
     elif transmitterType == CUBIC:
         borders, stp, height, _ = parseHead(head, transmitterType)
-        for z in frange(height[0], height[1], stp[2]):
-            for y in frange(borders[1], borders[3], stp[1]):
-                for x in frange(borders[0], borders[2], stp[0]):
+        for z in range(height[0], height[1], stp[2]):
+            for y in range(borders[1], borders[3], stp[1]):
+                for x in range(borders[0], borders[2], stp[0]):
                     transmitters.append([x, y, z])
 
     return transmitters
-
-
-def parseBorders(input):
-    return np.genfromtxt(io.StringIO(input.strip()), delimiter=" ").tolist()

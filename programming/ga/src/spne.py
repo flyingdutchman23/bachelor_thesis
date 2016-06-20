@@ -14,7 +14,6 @@ import graph_tool.all as gt
 
 import my_util
 #to evaluate with RaLaNS
-from port3_ralans.viewer2d import getFiles, parseConfigFile, parseResFile
 import ralans_wrapper as ralans
 
 def packet_received(ind_index, probe_index):
