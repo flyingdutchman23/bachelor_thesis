@@ -19,20 +19,7 @@ import ralans_wrapper as ralans
 def draw_individual_graph(individual,name):
 
     MAX_WINDOW = 1000
-    size_x = config.BORDERS[2] - config.BORDERS[0]
-    size_y = config.BORDERS[3] - config.BORDERS[1]
-    output_size = (80 * size_x, 80 * size_y)
-
-    #to keep the relation of the window and to keep the size smaller than MAX_WINDOW
-    if max(output_size) > MAX_WINDOW:
-        if config.LENG[1] > config.LENG[0]:
-            col_size = int(output_size[1] / (output_size[0] / MAX_WINDOW))
-            output_size = (MAX_WINDOW,col_size)
-        elif config.LENG[0] > config.LENG[1]:
-            row_size = int(output_size[0] / (output_size[1] / MAX_WINDOW))
-            output_size = (row_size,MAX_WINDOW)
-        else:
-            output_size = (MAX_WINDOW,MAX_WINDOW)
+    output_size = (MAX_WINDOW, MAX_WINDOW)
 
     #build Graph to store nodes for plotting
     nodes = np.nonzero(individual)[0]
@@ -40,16 +27,17 @@ def draw_individual_graph(individual,name):
 
     positions = g.new_vertex_property("vector<double>")
     for node_index in range(len(nodes)):
-        pos = my_util.onedpos_to_2dpos(nodes[node_index]) 
-        # pos =  (pos[1] * output_size[0] / config.LENG[0],
-                # output_size[1] - (pos[0] * output_size[1] / config.LENG[1]))
+        pos = my_util.onedpos_to_2dpos(nodes[node_index], config.POSITIONS) 
+        # correct the y value, because the origin(the 0 value) is at the top and in
+        # another plot it is at the bottom
+        pos[config.YAXIS] = config.BORDERS[2 + config.YAXIS] - pos[config.YAXIS]
         positions[g.vertex(node_index)] = pos
 
 
+    # store it as a png picture
     name += ".png"
-    print('FOLDER: ', config.FOLDER)
-    print('name: ', name)
-    gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=18, 
+
+    gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=12, 
             output=config.FOLDER+name, output_size=output_size)
 
 
@@ -119,51 +107,42 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     #make correct relation of width and height in plot
     left = 0.2
     bottom = 0.2
-
-    size_x = config.BORDERS[2] - config.BORDERS[0]
-    size_y = config.BORDERS[3] - config.BORDERS[1]
-
+    size_x = config.BORDERS[2] - config.BORDERS[0] + 1
+    size_y = config.BORDERS[3] - config.BORDERS[1] + 1
     if size_y > size_x:
         left += (0.9 - left) * (1 - size_x / size_y)
     elif size_x > size_y:
         bottom += (0.9 - bottom) * (1 - size_y / size_y)
-
-    print("left, bottom: ",left,bottom)
     fig.add_axes((left,bottom, 0.9 - left, 0.9 - bottom))
 
-    rows = []
-    cols = []
+    x_values = []
+    y_values = []
 
+    print('BORDERS:', config.BORDERS)
 
     for index, gen in enumerate(individual):
         if gen == 1:
             transmitter = config.POSITIONS[index]
             print('transmitter: ', transmitter)
-            rows.append(transmitter[config.XAXIS])
-            cols.append(transmitter[config.YAXIS])
-
-    # values = np.reshape(individual,(config.LENG[1],config.LENG[0]))
-
-    # for index, gen in np.ndenumerate(values):
-        # if gen == 1:
-            # transmitter = config.POSITIONS[index]
-            # rows.append(index[0] * config.REAL_DIST_CELL)
-            # cols.append(index[1] * config.REAL_DIST_CELL)
+            x_values.append(transmitter[config.XAXIS])
+            y_values.append(transmitter[config.YAXIS])
             # if add_circles:
                 # circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
                     # radius=config.MAX_DIST, color='r',fill=False)
                 # fig.gca().add_artist(circle)
                 # fig.gca().plot(index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL)
 
-    fig.gca().scatter(cols,rows)
-    # fig.gca().set_ylim([config.BORDERS[1],config.BORDERS[3]])
-    # fig.gca().set_xlim([config.BORDERS[0],config.BORDERS[2]])
-    # fig.gca().set_ylim([-0.5,config.LENG[1]-0.5])
-    # fig.gca().set_xlim([-0.5,config.LENG[0]-0.5])
+    fig.gca().scatter(x_values, y_values)
+    fig.gca().set_ylabel("y [m]")
+    plt.gca().set_xlabel("x [m]")
+    fig.gca().set_ylim([config.BORDERS[config.YAXIS],
+        config.BORDERS[2 + config.YAXIS]])
+    fig.gca().set_xlim([config.BORDERS[config.XAXIS],
+        config.BORDERS[2 + config.XAXIS]])
 
     if add_grid:
-        fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
-        fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[0]-0.5,1))
+        fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[config.XAXIS]-0.5,1))
+        fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[config.YAXIS]-0.5,1))
         fig.gca().grid(True,linestyle='solid')
     fig.suptitle('Scatter Plot' + name)
 
@@ -173,7 +152,7 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     fig.text(0.1,0.1,description)
 
     if save:
-        name = "nodes_with_circles" + "_" + name 
+        name = "scatter_nodes" + "_" + name 
         fig.savefig(config.FOLDER+name)
 
     if to_show:
