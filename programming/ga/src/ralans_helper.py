@@ -39,6 +39,10 @@ CUBIC = 3
 # the constant for list
 LIST = 4
 
+XAXIS = 0
+YAXIS = 1
+ZAXIS = 2
+
 DEBUG = 0
 
 def parseConfigFile(filename, isZip=True):
@@ -188,12 +192,8 @@ def parseTransmitterHeader(head):
     elif transmitterType == LIST:
 
         headtr = head[2:]
-        while True:
-            # print len(headtr)
-            if len(headtr) == 0:
-                break
-            # print len(headtr)
-            transmitter = [headtr[0], headtr[1], headtr[2]]
+        while len(headtr) > 0:
+            transmitter = [headtr[XAXIS], headtr[YAXIS], headtr[ZAXIS]]
             headtr = headtr[3:]
             transmitters.append(transmitter)
 

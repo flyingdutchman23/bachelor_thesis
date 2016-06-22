@@ -26,6 +26,7 @@ import sys
 
 import config
 import ralans_helper
+import my_util
 
 DEBUG = 0
 
@@ -82,7 +83,14 @@ def read_resultfile(filename, isZip=True):
             borders = ralans_helper.parseBorders(f.readline())
             print("border in result: ", borders)
             assert len(borders) == 4
+
+            data_borders = my_util.calc_borders(config.POSITIONS)
+            data_borders = my_util.remove_border_axis(data_borders)
+            if not my_util.isin_borders(borders, data_borders):
+                borders = data_borders
+
             config.BORDERS = borders
+
 
         trid = 0
         cur_trans_signals = []

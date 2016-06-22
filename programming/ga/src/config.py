@@ -92,11 +92,13 @@ LIST = ralans_helper.LIST
 
 # to specify which axes refers to which number
 # the x axis
-XAXIS = 0
+XAXIS = ralans_helper.XAXIS
 # the y axis
-YAXIS = 1
+YAXIS = ralans_helper.YAXIS
 # the z axis
-ZAXIS = 2
+ZAXIS = ralans_helper.ZAXIS
+
+DIM = 3
 
 # compare values for the prototype and RaLaNS
 RALANS = 1
@@ -277,13 +279,6 @@ def fill_config(configfile):
             LENG[YAXIS] = 1
             LENG[ZAXIS] = 1
 
-
-        # TODO find a way to copy
-        # save the config file of RaLaNS in the result folder as well.
-
-
-        # TODO not sure whether to store it or not
-        # RaLaNS_RESFILE = resfile
         resfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
@@ -297,12 +292,20 @@ def fill_config(configfile):
         zf.extract('config.cfg',FOLDER)
         ralans_configfile.close()
 
+        # for pos in POSITIONS:
+            # print("Boders: ", BORDERS)
+            # print("pos: ", pos)
+            # assert pos[XAXIS] >= BORDERS[0]
+            # assert pos[YAXIS] >= BORDERS[1]
+            # assert pos[XAXIS] <= BORDERS[2]
+            # assert pos[YAXIS] <= BORDERS[3]
+
+
 
     # save a copy of the configfile in the result folder as well
     shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
     assert len(BORDERS) == 4
-    # TODO calculates the number of rows and columns
 
 def gen_error_message(message, arg):
     """generates an error message for the invalid argument with its value and type
