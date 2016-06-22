@@ -4,6 +4,8 @@ import numpy as np
 import copy
 
 DIM = 3
+XAXIS = 0
+YAXIS = 1
 ZAXIS = 2
 def onedpos_to_2dpos(pos, positions):
     """converts the position of the array into a tuple, which describes the position in
@@ -16,7 +18,7 @@ def onedpos_to_2dpos(pos, positions):
 
     pos = positions[pos]
 
-    assert len(pos) == 3
+    assert len(pos) == DIM
     pos = pos[:2]
 
     return pos
@@ -70,3 +72,20 @@ def remove_border_axis(borders, axis=ZAXIS, dim=DIM):
     del borders[axis]
 
     return borders
+
+def calc_size(borders):
+    """calculates the size for each axis specified by the given borders. The borders
+    should be either just contain the values for the x and y dimension or for the x, y and
+    z dimension.
+
+    :borders: the borders values for the data
+    :returns: the size of the data(map) in each dimension
+
+    """
+    assert len(borders) % 2 == 0
+    assert len(borders) <= 2*DIM
+    size = [None] * len(borders)
+    for i in range(len(size)):
+        size[i] = borders[len(size) + i] - borders[i]
+
+    return size
