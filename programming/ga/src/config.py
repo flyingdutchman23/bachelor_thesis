@@ -191,13 +191,13 @@ def fill_config(configfile):
         if PLACEMENT_TYPE == CUBIC:
             COVERAGE_LEVEL = config['data']['prototype']['cubic']['COVERAGE_LEVEL']   
             COVERAGE_MAX_LEVEL = config['data']['prototype']['cubic']['COVERAGE_MAX_LEVEL']   
-            LENG[2] = COVERAGE_MAX_LEVEL - COVERAGE_LEVEL
+            LENG[ZAXIS] = COVERAGE_MAX_LEVEL - COVERAGE_LEVEL
         elif PLACEMENT_TYPE == LIST:
             POSITIONS = config['data']['prototype']['list']['POSITIONS']   
         elif PLACEMENT_TYPE == AREA:
-            LENG[0] = BORDERS[2] - BORDERS[0]
-            LENG[1] = BORDERS[3] - BORDERS[1]
-            LENG[2] = 1
+            LENG[XAXIS] = BORDERS[2] - BORDERS[0] + 1
+            LENG[YAXIS] = BORDERS[3] - BORDERS[1] + 1
+            LENG[ZAXIS] = 1
         else:
             sys.exit('PLACEMENT_TYPE not available')
 
@@ -261,9 +261,7 @@ def fill_config(configfile):
             # if placement type is cubic or area, then the lenght of an individual is just
             # the multiplicaion of the length in each axis
 
-            print('LENG: ', LENG)
-            assert len(LENG) == 3
-            IND_LEN = LENG[0] * LENG[1] * LENG[2]
+            IND_LEN = np.prod(LENG)
             assert IND_LEN == len(POSITIONS)
 
         elif PLACEMENT_TYPE == LIST:
@@ -283,6 +281,7 @@ def fill_config(configfile):
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
+    assert len(LENG) == 3
     create_result_folder(TYPE_NAME, get_placement_name(PLACEMENT_TYPE), IND_LEN)
 
 
