@@ -104,7 +104,8 @@ def init():
         sys.exit('Wrong mate function!')
 
     if config.MUTATE == 0:
-        toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
+        toolbox.register("mutate", tools.mutFlipBit,
+                indpb=config.MUTATE_IND_PROB)
     elif config.MUTATE == 1:
         toolbox.register("mutate", mutates.lochert_mutate_one)
     elif config.MUTATE == 2:
