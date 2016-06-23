@@ -124,7 +124,8 @@ def run():
     pop = toolbox.population(n=config.POP_SIZE)
 
     hof = tools.HallOfFame(config.HOF_NUM)
-    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, 
+    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5,
+            mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
     plot_helper.avg_min_max(logbook)
