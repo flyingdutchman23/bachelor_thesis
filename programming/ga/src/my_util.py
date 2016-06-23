@@ -2,6 +2,7 @@
 
 import numpy as np
 import copy
+import pickle
 
 DIM = 3
 XAXIS = 0
@@ -100,11 +101,11 @@ def save_node_positions(filepath, individual, positions):
     :returns: TODO
 
     """
-    transfile = open(filepath, "w")
+    output = open(filepath, "w")
 
     for index, gen in enumerate(individual):
         if gen==1:
-            line = "Pos: " + str(positions[index])
-            transfile.write(line)
+            line = "Pos: " + str(positions[index]) + "\n"
+            output.write(line)
 
-    transfile.close()
+    output.close()
