@@ -21,6 +21,8 @@ import numpy as np
 import array
 # to exit program if mistake occurs
 import sys
+# to check content of a variable
+from pprint import pprint
 
 #from the genetic algorithms package
 from deap import algorithms
@@ -121,7 +123,12 @@ def run():
     #to have same random numbers
     # random.seed(config.POP_SIZE)
 
+    his = tools.History()
+    toolbox.decorate("mate", his.decorator)
+    toolbox.decorate("mutate", his.decorator)
+
     pop = toolbox.population(n=config.POP_SIZE)
+    his.update(pop)
 
     hof = tools.HallOfFame(config.HOF_NUM)
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5,
@@ -135,6 +142,9 @@ def run():
     if config.PLACEMENT_TYPE != config.LIST:
         plot_helper.map(hof[0],"best_individual_after_end")
         plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
+
+    pprint(vars(his))
+    plot_helper.history(his, toolbox)
 
     #TODO save the information somewhere
     return pop, logbook, hof
