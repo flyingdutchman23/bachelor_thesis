@@ -123,27 +123,17 @@ def run():
 
     pop = toolbox.population(n=config.POP_SIZE)
 
-    print("len of pop:",len(pop))
-    print_helper.individual(pop[0])
-
-    # for i in range(config.POP_SIZE):
-        # title = "individual after init, nodes: " + str(sum(pop[i]))
-        # plot_helper.map(pop[i],title)
-
     hof = tools.HallOfFame(config.HOF_NUM)
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.1, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
-    print("len of pop:",len(pop))
-
-    print_helper.individual(pop[0])
     plot_helper.avg_min_max(logbook)
-    plot_helper.map(hof[0],"best_individual_after_end")
-    plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
-
     plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
     plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
-    print_helper.individual(hof[0])
+
+    if config.PLACEMENT_TYPE != config.LIST:
+        plot_helper.map(hof[0],"best_individual_after_end")
+        plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
 
     #TODO save the information somewhere
     return pop, logbook, hof
