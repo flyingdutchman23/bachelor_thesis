@@ -117,8 +117,6 @@ def read_resultfile(filename, isZip=True):
             for that tranmitter               
             """
             if receiver_count == config.LENG[config.YAXIS] * config.LENG[config.ZAXIS]:
-                print('len signals 1 trans: ', len(signals[trid]))
-                print('len cur trans signals: ', len(cur_trans_signals))
                 assert len(signals[trid]) == len(cur_trans_signals)
                 signals[trid][:] = cur_trans_signals 
                 cur_trans_signals = []
