@@ -21,3 +21,13 @@ def individual_plotorder(individual):
     for r in range(config.LENG[1]-1,-1,-1):
         row = list(individual[r*config.LENG[0]:(r+1)*config.LENG[0]])
         print(r,row)
+
+def population(pop):
+    """print the complete population.
+
+    :pop: the population to print
+
+    """
+    for i in range(len(pop)):
+        print('Individual nr. ', i)
+        individual(pop[i])
