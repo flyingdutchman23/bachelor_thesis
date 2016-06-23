@@ -7,6 +7,7 @@ DIM = 3
 XAXIS = 0
 YAXIS = 1
 ZAXIS = 2
+
 def onedpos_to_2dpos(pos, positions):
     """converts the position of the array into a tuple, which describes the position in
     the grid with a value for the row and a value for the column.
@@ -89,3 +90,21 @@ def calc_size(borders):
         size[i] = borders[len(size) + i] - borders[i]
 
     return size
+
+def save_node_positions(filepath, individual, positions):
+    """save the positions of the nodes to a txt file.
+
+    :filepath: TODO
+    :individual: TODO
+    :POSITIONS: TODO
+    :returns: TODO
+
+    """
+    transfile = open(filepath, "w")
+
+    for index, gen in enumerate(individual):
+        if gen==1:
+            line = "Pos: " + str(positions[index])
+            transfile.write(line)
+
+    transfile.close()

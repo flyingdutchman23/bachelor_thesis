@@ -36,6 +36,7 @@ import spne
 #to have access to the global constants and variables
 import config
 #to use some util functions
+import my_util
 # TODO activate later
 import plot_helper
 import print_helper
@@ -145,6 +146,8 @@ def run():
 
     pprint(vars(his))
     plot_helper.history(his, toolbox)
+    my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", hof[0],
+            config.POSITIONS)
 
     #TODO save the information somewhere
     return pop, logbook, hof
