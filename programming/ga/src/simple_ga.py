@@ -150,5 +150,10 @@ def run():
     my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", hof[0],
             config.POSITIONS)
 
+    my_util.save_dict(config.FOLDER+"history_individuals.ser",
+            his.genealogy_history)
+    my_util.save_dict(config.FOLDER+"history_tree.ser",
+            his.genealogy_tree)
+
     #TODO save the information somewhere
     return pop, logbook, hof

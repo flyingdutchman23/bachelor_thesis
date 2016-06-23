@@ -1,8 +1,12 @@
 ### all kind of small functions needed for this project
-
+import array
 import numpy as np
 import copy
 import pickle
+
+#from the genetic algorithms package to load the dictionary
+from deap import creator
+from deap import base
 
 DIM = 3
 XAXIS = 0
@@ -109,3 +113,35 @@ def save_node_positions(filepath, individual, positions):
             output.write(line)
 
     output.close()
+
+def save_dict(filepath, dictionary):
+    """save a dictionary object to a file for persistence.
+
+    :filepath: the path of the file
+    :dict: the dictionary
+
+    """
+    output = open(filepath,'wb')
+    pickle.dump(dictionary, output)
+    output.close()
+
+def load_dict(filepath):
+    """load a dictionary, which was saved with save_dict before from a specified
+    file.
+
+    :filepath: the path to the file
+    :returns: the dictionary object
+
+    """
+
+    creator.create("FitnessMax", base.Fitness, weights=())
+    creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+
+    input_dict = open(filepath, 'rb')
+    dictionary = pickle.load(input_dict)
+    input_dict.close()
+
+    print('Mydict: ', dictionary)
+    assert isinstance(dictionary, dict)
+
+    return dictionary
