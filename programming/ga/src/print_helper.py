@@ -6,11 +6,14 @@ import config
 def individual(individual):
 
     print("Individual, nodes: ",sum(individual))
-    for r in range(config.LENG[1]):
-        row = []
-        for c in range(config.LENG[0]):
-            row.append(individual[r * config.LENG[0] + c])
-        print(r,row)
+    if config.PLACEMENT_TYPE == config.LIST:
+        print(individual)
+    else:
+        for r in range(config.LENG[config.YAXIS]):
+            row = []
+            for c in range(config.LENG[config.XAXIS]):
+                row.append(individual[r * config.LENG[0] + c])
+            print(r,row)
 
 def individual_plotorder(individual):
 
