@@ -125,7 +125,7 @@ def get_placement_name(placement_type=PLACEMENT_TYPE):
     else:
         sys.exit(gen_error_message('incorrect PLACEMENT_TYPE: ', placement_type))
 
-def create_result_folder(type_name, placement_name, ind_len):
+def create_result_folder(type_name, placement_name):
     """creates the folder, in which the result files will be placed.
 
     """
@@ -133,7 +133,9 @@ def create_result_folder(type_name, placement_name, ind_len):
     FOLDER = "../results/" + "ga_run" + "/"
     FOLDER += type_name + "/"
     FOLDER += placement_name + "/"
-    FOLDER += "LEN_" + str(ind_len) + "/"
+    FOLDER += "LEN_" + str(IND_LEN) + "/"
+    FOLDER += "GEN_NUM_" + str(GEN_NUM) + "/"
+    FOLDER += "POP_SIZE_" + str(POP_SIZE) + "/"
     FOLDER += "time_" + START_TIME_STR + "/"
     if not os.path.exists(FOLDER):
         os.makedirs(FOLDER)
@@ -282,7 +284,7 @@ def fill_config(configfile):
         sys.exit(gen_error_message('error for TYPE', TYPE))
 
     assert len(LENG) == 3
-    create_result_folder(TYPE_NAME, get_placement_name(PLACEMENT_TYPE), IND_LEN)
+    create_result_folder(TYPE_NAME, get_placement_name(PLACEMENT_TYPE))
 
 
     # save the config of RaLaNS
