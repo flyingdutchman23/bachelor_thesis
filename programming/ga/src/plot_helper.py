@@ -2,6 +2,12 @@
 import matplotlib.pyplot as plt
 #to plot with numpy arrays
 import numpy as np
+# to measure needed time for functions
+import time
+# to draw buildings
+import io
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon
 
 ###My package imports
 #to have access to the global constants and variables
@@ -13,6 +19,7 @@ import graph_tool.all as gt
 import init_functions as init
 import my_util
 import ralans_wrapper as ralans
+import ralans_helper
 from constants import XAXIS, YAXIS 
 
 ###helper module to plot specific states and results
@@ -95,8 +102,9 @@ def map(data,name,save=True,to_show=True,description=""):
     if to_show:
         plt.show()
 
-def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=True,
-        description="", add_circles=False, add_grid=False):
+def scatter_map_dist(individual, name, save=True, to_show=True, 
+        print_fitness=True, description="", add_circles=False, add_grid=False,
+        add_buildings=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
     :individual: should be the individual, may work for other kind of data as well
@@ -139,6 +147,10 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
         config.BORDERS[2 + YAXIS]])
     fig.gca().set_xlim([config.BORDERS[XAXIS],
         config.BORDERS[2 + XAXIS]])
+
+    _, _, bdfile = ralans_helper.getFiles(config.FILENAME)
+    if add_buildings:
+        draw_buildings(plt, (0,0,0), bdfile)
 
     if add_grid:
         fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[XAXIS]-0.5,1))
@@ -219,3 +231,39 @@ def history(his, toolbox, save=True):
     if save:
         gt.graphviz_draw(g, layout="dot", output=config.FOLDER+name)
         # plt.savefig(config.FOLDER + name)
+
+def draw_buildings(plt, color, bdfile):
+    polygons = []
+    st = time.time()
+    print("Draw buildings...")
+    for l in bdfile:
+        l = ralans_helper.conv_byte_to_str(l)
+        poly = np.loadtxt(io.StringIO(l), delimiter=" ")
+        xs = poly[::3]
+        ys = poly[1::3]
+        assert len(xs) == len(ys)
+        print("poly: ", poly)
+        print("xs: ", xs)
+        print("ys: ", ys)
+        print("len poly: ", len(poly))
+        print("len xs: ", len(xs))
+        print("len ys: ", len(ys))
+        zipxy = np.empty((len(xs),2))
+        for index, (value1, value2) in enumerate(zip(xs, ys)):
+            print('index: ', index)
+            print('values: ', (value1, value2))
+            zipxy[index] = [value1, value2]
+        print("len zipxy: ", len(zipxy))
+        polygonzipxy = Polygon(zipxy, fill=False)
+        print('polygons: ', polygonzipxy)
+        polygons.append(polygonzipxy)
+
+    c = PatchCollection(np.array(polygons), match_original=True)
+    #c.set_hatch("\\\\\\\\")
+    c.set_alpha(0.3)
+    c.set_facecolor(color)
+    c.set_edgecolor(color)
+    plt.gca().add_collection(c)
+
+    print("Needed time:", time.time() - st)
+    bdfile.close()

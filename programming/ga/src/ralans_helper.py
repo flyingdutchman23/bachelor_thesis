@@ -30,6 +30,12 @@ from constants import AREA, CUBIC, POINT, LIST, XAXIS, YAXIS, ZAXIS
 RESULTFILENAME = 'result.txt'
 # the name of the config file in RaLaNS
 CONFIGFILENAME = 'config.cfg'
+# the directory for the polygons
+POLYGONSDIR = 'polygons/'
+# the filename for the buildings
+BUILDINGSFILENAME = 'buildings.txt'
+# the path to the buildings file
+BUILDINGSPATH = POLYGONSDIR + BUILDINGSFILENAME
 
 def parseConfigFile(filename, isZip=True):
     """
@@ -66,9 +72,15 @@ def getFiles(zipf):
     resfile = zf.open(RESULTFILENAME)
     configfile = zf.open(CONFIGFILENAME)
 
+    bdfile = None
+    try:
+        bdfile = zf.open(BUILDINGSPATH)
+    except:
+        print("No polygon file found! Will not draw buildings on the map.")
+
     zf.close()
 
-    return resfile, configfile
+    return resfile, configfile, bdfile
 
 def getTransmitters(filename, isZip=False):
     """

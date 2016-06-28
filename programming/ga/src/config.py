@@ -202,7 +202,7 @@ def fill_config(configfile):
         print('type filename in config: ', type(FILENAME))
         THRESHOLD = config['data']['ralans']['THRESHOLD']
 
-        resfile, ralans_configfile = ralans_helper.getFiles(FILENAME)
+        resfile, ralans_configfile, _ = ralans_helper.getFiles(FILENAME)
 
         ralans_config = ralans_helper.parseConfigFile(ralans_configfile, isZip=True)
         STEPSIZE = ralans_config['stepSize']

@@ -43,7 +43,7 @@ def init():
     print('FILENAME: ', config.FILENAME)
     print('LENG: ', config.LENG)
     print('COVERAGE_LEVEL: ', config.COVERAGE_LEVEL)
-    resfile, _  = ralans_helper.getFiles(config.FILENAME)
+    resfile, _, _  = ralans_helper.getFiles(config.FILENAME)
     read_resultfile(resfile, True)
     resfile.close()
 
