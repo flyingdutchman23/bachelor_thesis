@@ -63,9 +63,6 @@ def getFiles(zipf):
 
     zf = zipfile.ZipFile(zipf, 'r')
 
-    RESULTFILENAME
-    CONFIGFILENAME
-
     resfile = zf.open(RESULTFILENAME)
     configfile = zf.open(CONFIGFILENAME)
 
