@@ -24,26 +24,12 @@ import numpy as np
 import io
 import sys
 import zipfile
+from constants import AREA, CUBIC, POINT, LIST, XAXIS, YAXIS, ZAXIS
 
 # the name of the result file in RaLaNS
 RESULTFILENAME = 'result.txt'
 # the name of the config file in RaLaNS
 CONFIGFILENAME = 'config.cfg'
-
-# the constant for POINT
-POINT = 0
-# the constant for area
-AREA = 2
-# the constant for cubic
-CUBIC = 3
-# the constant for list
-LIST = 4
-
-XAXIS = 0
-YAXIS = 1
-ZAXIS = 2
-
-DEBUG = 0
 
 def parseConfigFile(filename, isZip=True):
     """

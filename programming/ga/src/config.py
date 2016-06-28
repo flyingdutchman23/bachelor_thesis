@@ -21,6 +21,9 @@ import io
 
 # contains verious functions to deal with the RaLaNS data
 import ralans_helper
+# to have the constants
+from constants import XAXIS, YAXIS, ZAXIS, DIM, LIST, AREA, CUBIC, POINT,\
+        RALANS, PROTOTYPE
 
 CONFIGSPECFILE = "./genetic_algorithm_specifications.cfg"
 ###Global Constants
@@ -83,26 +86,6 @@ FILENAME = None
 STEPSIZE = None
 # the file, which contains the actual result txt file in the zip file.
 RaLaNS_RESFILE = None
-
-# copy constants for RaLaNS placement types
-POINT = ralans_helper.POINT
-AREA = ralans_helper.AREA
-CUBIC = ralans_helper.CUBIC
-LIST = ralans_helper.LIST
-
-# to specify which axes refers to which number
-# the x axis
-XAXIS = ralans_helper.XAXIS
-# the y axis
-YAXIS = ralans_helper.YAXIS
-# the z axis
-ZAXIS = ralans_helper.ZAXIS
-
-DIM = 3
-
-# compare values for the prototype and RaLaNS
-RALANS = 1
-PROTOTYPE = 0
 
 #so every saved plot in 1 run has same time
 START_TIME = time.time()

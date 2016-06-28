@@ -8,10 +8,8 @@ import pickle
 from deap import creator
 from deap import base
 
-DIM = 3
-XAXIS = 0
-YAXIS = 1
-ZAXIS = 2
+# to have the constants available
+from constants import DIM, XAXIS, YAXIS, ZAXIS
 
 def onedpos_to_2dpos(pos, positions):
     """converts the position of the array into a tuple, which describes the position in

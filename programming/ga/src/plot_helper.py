@@ -13,6 +13,7 @@ import graph_tool.all as gt
 import init_functions as init
 import my_util
 import ralans_wrapper as ralans
+from constants import XAXIS, YAXIS 
 
 ###helper module to plot specific states and results
 
@@ -30,7 +31,7 @@ def draw_individual_graph(individual,name):
         pos = my_util.onedpos_to_2dpos(nodes[node_index], config.POSITIONS) 
         # correct the y value, because the origin(the 0 value) is at the top and in
         # another plot it is at the bottom
-        pos[config.YAXIS] = config.BORDERS[2 + config.YAXIS] - pos[config.YAXIS]
+        pos[YAXIS] = config.BORDERS[2 + YAXIS] - pos[YAXIS]
         positions[g.vertex(node_index)] = pos
 
 
@@ -72,7 +73,7 @@ def avg_min_max(logbook,save=True,to_show=True):
 def map(data,name,save=True,to_show=True,description=""):
     #clear last figure, if it exists
     plt.clf()
-    values = np.reshape(data,(config.LENG[config.YAXIS],config.LENG[config.XAXIS]))
+    values = np.reshape(data,(config.LENG[YAXIS],config.LENG[XAXIS]))
 
     plt.gcf().add_axes((0.2,0.2,0.7,0.7))
     plt.imshow(values, vmin=0, vmax=max(data), interpolation="nearest",
@@ -123,8 +124,8 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
         if gen == 1:
             transmitter = config.POSITIONS[index]
             print('transmitter: ', transmitter)
-            x_values.append(transmitter[config.XAXIS])
-            y_values.append(transmitter[config.YAXIS])
+            x_values.append(transmitter[XAXIS])
+            y_values.append(transmitter[YAXIS])
             # if add_circles:
                 # circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
                     # radius=config.MAX_DIST, color='r',fill=False)
@@ -134,14 +135,14 @@ def scatter_map_dist(individual, name, save=True, to_show=True, print_fitness=Tr
     fig.gca().scatter(x_values, y_values)
     fig.gca().set_ylabel("y [m]")
     plt.gca().set_xlabel("x [m]")
-    fig.gca().set_ylim([config.BORDERS[config.YAXIS],
-        config.BORDERS[2 + config.YAXIS]])
-    fig.gca().set_xlim([config.BORDERS[config.XAXIS],
-        config.BORDERS[2 + config.XAXIS]])
+    fig.gca().set_ylim([config.BORDERS[YAXIS],
+        config.BORDERS[2 + YAXIS]])
+    fig.gca().set_xlim([config.BORDERS[XAXIS],
+        config.BORDERS[2 + XAXIS]])
 
     if add_grid:
-        fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[config.XAXIS]-0.5,1))
-        fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[config.YAXIS]-0.5,1))
+        fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[XAXIS]-0.5,1))
+        fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[YAXIS]-0.5,1))
         fig.gca().grid(True,linestyle='solid')
     fig.suptitle('Scatter Plot' + name)
 

@@ -24,6 +24,7 @@ import numpy as np
 import io
 import sys
 
+from constants import XAXIS, YAXIS, ZAXIS, AREA, CUBIC, LIST
 import config
 import ralans_helper
 import my_util
@@ -64,7 +65,7 @@ def read_resultfile(filename, isZip=True):
 
     print('1st line: ', f.readline())
     print('2nd line: ', f.readline())
-    print('size YAXIS * ZAXIS: ', config.LENG[config.YAXIS] * config.LENG[config.ZAXIS])
+    print('size YAXIS * ZAXIS: ', config.LENG[YAXIS] * config.LENG[ZAXIS])
     print('config.IND_LEN: ', config.IND_LEN)
     print('config.LENG: ', config.LENG)
 
@@ -77,9 +78,9 @@ def read_resultfile(filename, isZip=True):
     signals = np.NAN * np.empty((config.IND_LEN, config.IND_LEN))
 
 
-    if config.PLACEMENT_TYPE in [config.CUBIC, config.AREA, config.LIST]:
+    if config.PLACEMENT_TYPE in [CUBIC, AREA, LIST]:
 
-        if config.PLACEMENT_TYPE == config.LIST:
+        if config.PLACEMENT_TYPE == LIST:
             borders = ralans_helper.parseBorders(f.readline())
             print("border in result: ", borders)
             assert len(borders) == 4
@@ -104,7 +105,7 @@ def read_resultfile(filename, isZip=True):
 
             line = ralans_helper.conv_byte_to_str(line)
             new_signals = np.loadtxt(io.StringIO(line), delimiter=" ").tolist()
-            assert len(new_signals) == config.LENG[config.XAXIS]
+            assert len(new_signals) == config.LENG[XAXIS]
             cur_trans_signals.extend(new_signals)
             receiver_count += 1
 
@@ -116,7 +117,7 @@ def read_resultfile(filename, isZip=True):
             until the lineCounter has has the value of yLen * zLen, so that all signals are read 
             for that tranmitter               
             """
-            if receiver_count == config.LENG[config.YAXIS] * config.LENG[config.ZAXIS]:
+            if receiver_count == config.LENG[YAXIS] * config.LENG[ZAXIS]:
                 assert len(signals[trid]) == len(cur_trans_signals)
                 signals[trid][:] = cur_trans_signals 
                 cur_trans_signals = []

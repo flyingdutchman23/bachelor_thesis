@@ -1,17 +1,18 @@
 
 ### helper module to print specific states and results via normal print on terminal
 
+from constants import XAXIS, YAXIS, LIST
 import config
 
 def individual(individual):
 
     print("Individual, nodes: ",sum(individual))
-    if config.PLACEMENT_TYPE == config.LIST:
+    if config.PLACEMENT_TYPE == LIST:
         print(individual)
     else:
-        for r in range(config.LENG[config.YAXIS]):
+        for r in range(config.LENG[YAXIS]):
             row = []
-            for c in range(config.LENG[config.XAXIS]):
+            for c in range(config.LENG[XAXIS]):
                 row.append(individual[r * config.LENG[0] + c])
             print(r,row)
 
