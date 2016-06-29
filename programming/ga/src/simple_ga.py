@@ -57,34 +57,11 @@ stats.register("max", np.max)
 
 
 def init():
+
     #specify individual, creation of it
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
-    # Choose init function
-    if config.INIT == 0:
-        toolbox.register("init", inits.normal_random)
-    elif config.INIT == 1:
-        num_of_nodes = int(config.INIT_ARG)
-        assert num_of_nodes > 0
-        toolbox.register("init", inits.fixed_number_random, num_of_nodes)
-    elif config.INIT == 2:
-        prob_to_set_node = float(config.INIT_ARG)
-        assert prob_to_set_node >= 0.0
-        assert prob_to_set_node <= 1.0
-        toolbox.register("init", inits.flexible_random, prob_to_set_node)
-    elif config.INIT == 3:
-        sys.exit('this option is not implemented yet!')
-    elif config.INIT == 4:
-        sys.exit('this option is not implemented yet!')
-    else:
-        sys.exit('Wrong init function!')
-
-    #registers function to init individual
-    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.init)
-    #how to init hole population -> in list
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    
     #which functions to use for specific part of ga
     if config.FITNESS == 0:
         ralans.init()
@@ -93,6 +70,31 @@ def init():
         sys.exit('this option is not implemented yet!')
     else:
         sys.exit('Wrong fitness function!')
+
+    # Choose init function
+    if config.INIT in [0,1,2]:
+
+        if config.INIT == 0:
+            toolbox.register("init", inits.normal_random)
+        elif config.INIT == 1:
+            num_of_nodes = int(config.INIT_ARG[0])
+            assert num_of_nodes > 0
+            toolbox.register("init", inits.fixed_number_random, num_of_nodes)
+        else:
+            prob_to_set_node = float(config.INIT_ARG)
+            assert prob_to_set_node >= 0.0
+            assert prob_to_set_node <= 1.0
+            toolbox.register("init", inits.flexible_random, prob_to_set_node)
+        #registers function to init individual
+        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.init)
+        #how to init hole population -> in list
+        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    elif config.INIT in [3,4]:
+        toolbox.register("population", inits.best_samples, config.INIT_ARG,
+                init=config.INIT)
+    else:
+        sys.exit('Wrong init function!')
 
     if config.MATE == 0:
         toolbox.register("mate", tools.cxTwoPoint)
