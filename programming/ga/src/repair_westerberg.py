@@ -19,7 +19,7 @@ def repair():
     filepath = folder + filename
     newfilename = "westerberg_full_new.txt"
     newfilepath = folder + newfilename
-    i = 0
+    i = 1
     with open(filepath, "r") as input:
         with open(newfilepath,"wt") as output: 
             for l in input:
@@ -28,8 +28,9 @@ def repair():
                     linelist = np.loadtxt(io.StringIO(line)
                             , delimiter=" ").tolist()
                 except Exception as e:
-                    print("error in line: ",i)
+                    print("error in line: ", i)
                     print(l)
+                    print(e)
                     sys.exit()
                 if len(linelist) < 3:
                     sys.exit("Fault!")
