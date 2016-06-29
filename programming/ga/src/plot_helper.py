@@ -242,20 +242,10 @@ def draw_buildings(plt, color, bdfile):
         xs = poly[::3]
         ys = poly[1::3]
         assert len(xs) == len(ys)
-        print("poly: ", poly)
-        print("xs: ", xs)
-        print("ys: ", ys)
-        print("len poly: ", len(poly))
-        print("len xs: ", len(xs))
-        print("len ys: ", len(ys))
         zipxy = np.empty((len(xs),2))
         for index, (value1, value2) in enumerate(zip(xs, ys)):
-            print('index: ', index)
-            print('values: ', (value1, value2))
             zipxy[index] = [value1, value2]
-        print("len zipxy: ", len(zipxy))
         polygonzipxy = Polygon(zipxy, fill=False)
-        print('polygons: ', polygonzipxy)
         polygons.append(polygonzipxy)
 
     c = PatchCollection(np.array(polygons), match_original=True)
