@@ -123,7 +123,7 @@ def init():
         sys.exit('Wrong select function!')
 
 
-def run():
+def run(doSave=True, show=True):
     #to have same random numbers
     # random.seed(config.POP_SIZE)
 
@@ -139,16 +139,22 @@ def run():
             mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
-    plot_helper.avg_min_max(logbook)
-    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
-    plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
+    if doSave:
+        save(hof, logbook, pop, his, show)
 
-    if config.PLACEMENT_TYPE != config.LIST:
-        plot_helper.map(hof[0],"best_individual_after_end")
-        plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
+def save(hof, logbook, pop, his, show=True):
+    """does a lot of stuff after the ga to store data, plot data and the
+    Statistics.
 
+    :hof: the hall of fame
+    :logbook: the logbook, contains the Statistics
+    :pop: the final population
+    :his: the history
+
+    """
     pprint(vars(his))
     plot_helper.history(his, toolbox)
+
     my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", hof[0],
             config.POSITIONS)
 
@@ -157,5 +163,10 @@ def run():
     my_util.save_dict(config.FOLDER+"history_tree.ser",
             his.genealogy_tree)
 
-    #TODO save the information somewhere
-    return pop, logbook, hof
+    plot_helper.avg_min_max(logbook)
+    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
+    plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
+
+    if config.PLACEMENT_TYPE != config.LIST:
+        plot_helper.map(hof[0],"best_individual_after_end")
+        plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
