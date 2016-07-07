@@ -41,6 +41,8 @@ MUTATE_PROB = None
 MUTATE_IND_PROB = None
 # to specify which selection function should be used
 SELECTION = None
+# to specify the probability that an individual will be used for the selection.
+SELECT_PROB = None
 # to specify which reproduction function should be used
 MATE = None
 # to specify which init function should be used
@@ -147,7 +149,7 @@ def fill_config(configfile):
     
     genetic_arg_options = ['MUTATE', 'SELECT', 'MATE', 'INIT', 'FITNESS']
     genetic_args = list(genetic_arg_options)
-    genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB',
+    genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
         'MUTATE_PROB','INIT_ARG','HOF_NUM'])
 
     for argument_name in genetic_args:

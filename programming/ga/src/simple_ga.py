@@ -135,7 +135,7 @@ def run(doSave=True, show=True):
     his.update(pop)
 
     hof = tools.HallOfFame(config.HOF_NUM)
-    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5,
+    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
             mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
