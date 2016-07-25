@@ -143,7 +143,7 @@ def build_graph(nodes):
     for node_index1, node1 in enumerate(nodes):
         for node_index2 in range((node_index1+1),num_of_nodes):
             node2 = nodes[node_index2]
-            if node_index1 != node_index2 and packet_received(node1,node2) == True:
+            if node_index1 != node_index2 and packet_received(node1,node2):
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
     return g
