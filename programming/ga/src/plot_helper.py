@@ -103,7 +103,7 @@ def map(data,name,save=True,to_show=True,description=""):
         plt.show()
 
 def scatter_map_dist(individual, name, save=True, to_show=True, 
-        print_fitness=True, description="", add_circles=False, add_grid=False,
+        print_fitness=True, description="", add_circles=True, add_grid=False,
         add_buildings=True):
     """prints the nodes on a white background on a 2d axes. Shows the plot.
 
@@ -134,11 +134,11 @@ def scatter_map_dist(individual, name, save=True, to_show=True,
             print('transmitter: ', transmitter)
             x_values.append(transmitter[XAXIS])
             y_values.append(transmitter[YAXIS])
-            # if add_circles:
-                # circle = plt.Circle((index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL), 
-                    # radius=config.MAX_DIST, color='r',fill=False)
-                # fig.gca().add_artist(circle)
-                # fig.gca().plot(index[1]*config.REAL_DIST_CELL,index[0]*config.REAL_DIST_CELL)
+            if add_circles and config.TYPE == config.PROTOTYPE:
+                circle = plt.Circle((transmitter[XAXIS],transmitter[YAXIS]), 
+                    radius=config.MAX_DIST, color='r',fill=False)
+                fig.gca().add_artist(circle)
+            fig.gca().plot(transmitter[XAXIS],transmitter[YAXIS])
 
     fig.gca().scatter(x_values, y_values)
     fig.gca().set_ylabel("y [m]")
@@ -147,12 +147,14 @@ def scatter_map_dist(individual, name, save=True, to_show=True,
         config.BORDERS[2 + YAXIS]])
     fig.gca().set_xlim([config.BORDERS[XAXIS],
         config.BORDERS[2 + XAXIS]])
+    fig.gca().set_aspect('equal', adjustable='box')
 
-    _, _, bdfile = ralans_helper.getFiles(config.FILENAME)
-    if add_buildings:
-        draw_buildings(plt, (0,0,0), bdfile)
+    if config.TYPE == config.RALANS:
+        _, _, bdfile = ralans_helper.getFiles(config.FILENAME)
+        if add_buildings:
+            draw_buildings(plt, (0,0,0), bdfile)
 
-    if add_grid:
+    if add_grid and config.PLACEMENT_TYPE == config.AREA:
         fig.gca().xaxis.set_ticks(np.arange(0.5,config.LENG[XAXIS]-0.5,1))
         fig.gca().yaxis.set_ticks(np.arange(0.5,config.LENG[YAXIS]-0.5,1))
         fig.gca().grid(True,linestyle='solid')
