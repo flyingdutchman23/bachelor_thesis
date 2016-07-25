@@ -23,6 +23,8 @@ import array
 import sys
 # to check content of a variable
 from pprint import pprint
+# to parallelize computation
+import multiprocessing
 
 #from the genetic algorithms package
 from deap import algorithms
@@ -56,12 +58,11 @@ stats.register("std", np.std)
 stats.register("min", np.min)
 stats.register("max", np.max)
 
+#specify individual, creation of it
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
 def init():
-
-    #specify individual, creation of it
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
     #which functions to use for specific part of ga
     if config.FITNESS == 0:
@@ -136,6 +137,10 @@ def run(doSave=True, show=True):
     pop = toolbox.population(n=config.POP_SIZE)
 
     hof = tools.HallOfFame(config.HOF_NUM)
+
+    pool = multiprocessing.Pool()
+    toolbox.register("map", pool.map)
+
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
             mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
