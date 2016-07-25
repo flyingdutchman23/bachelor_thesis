@@ -167,9 +167,9 @@ def read_header(headerfile):
         # is just the multiplicaion of the length in each axis
 
         IND_LEN = np.prod(LENG)
-        print('LENG: ', LENG)
-        print('IND_LEN: ', IND_LEN)
-        print('len(POSITIONS): ', len(POSITIONS))
+        # print('LENG: ', LENG)
+        # print('IND_LEN: ', IND_LEN)
+        # print('len(POSITIONS): ', len(POSITIONS))
         assert IND_LEN == len(POSITIONS)
 
     elif PLACEMENT_TYPE == LIST:
@@ -198,11 +198,11 @@ def fill_config(configfile):
     configspec = configobj.ConfigObj(CONFIGSPECFILE, list_values=False)
     config = configobj.ConfigObj(configfile, configspec=configspec, list_values=True)
     val = Validator()
-    test = config.validate(val)
-    if test == True:
+    test_passed = config.validate(val)
+    if test_passed:
             print('Succeeded.')
     else:
-        sys.exit(gen_error_message('Validation incorrect!!!', test))
+        sys.exit(gen_error_message('Validation incorrect!!!', test_passed))
     
     genetic_arg_options = ['MUTATE', 'SELECT', 'MATE', 'INIT', 'FITNESS']
     genetic_args = list(genetic_arg_options)
