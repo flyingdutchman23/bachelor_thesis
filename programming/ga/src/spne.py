@@ -44,10 +44,9 @@ def prototype_packet_received(ind_index,probe_index):
 
     """
 
-    ind = my_util.onedpos_to_2dpos(ind_index)
-    probe = my_util.onedpos_to_2dpos(probe_index)
+    ind = config.POSITIONS[ind_index]
+    probe = config.POSITIONS[probe_index]
     dist_cells = np.linalg.norm(np.subtract(ind,probe))
-    dist_cells *= config.REAL_DIST_CELL
 
     return dist_cells <= config.MAX_DIST
 

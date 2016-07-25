@@ -25,6 +25,7 @@ import io
 import sys
 import zipfile
 from constants import AREA, CUBIC, POINT, LIST, XAXIS, YAXIS, ZAXIS
+from my_util import frange
 
 # the name of the result file in RaLaNS
 RESULTFILENAME = 'result.txt'
@@ -195,15 +196,15 @@ def parseTransmitterHeader(head):
     # not very fast, but functional
     elif transmitterType == AREA:
         borders, stp, height, _ = parseHead(head, transmitterType)
-        for y in range(borders[1], borders[3], stp[1]):
-            for x in range(borders[0], borders[2], stp[0]):
+        for y in frange(borders[1], borders[3], stp[1]):
+            for x in frange(borders[0], borders[2], stp[0]):
                 transmitters.append([x, y, height[0]])
 
     elif transmitterType == CUBIC:
         borders, stp, height, _ = parseHead(head, transmitterType)
-        for z in range(height[0], height[1], stp[2]):
-            for y in range(borders[1], borders[3], stp[1]):
-                for x in range(borders[0], borders[2], stp[0]):
+        for z in frange(height[0], height[1], stp[2]):
+            for y in frange(borders[1], borders[3], stp[1]):
+                for x in frange(borders[0], borders[2], stp[0]):
                     transmitters.append([x, y, z])
 
     return transmitters

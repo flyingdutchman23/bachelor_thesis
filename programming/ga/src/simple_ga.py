@@ -34,6 +34,7 @@ from deap import tools
 #to use the spne metric
 import spne
 #to have access to the global constants and variables
+from constants import RALANS
 import config
 #to use some util functions
 import my_util
@@ -64,7 +65,8 @@ def init():
 
     #which functions to use for specific part of ga
     if config.FITNESS == 0:
-        ralans.init()
+        if config.TYPE == RALANS:
+            ralans.init()
         toolbox.register("evaluate", spne.graph_evaluate)
     elif config.FITNESS == 1:
         sys.exit('this option is not implemented yet!')
@@ -81,7 +83,7 @@ def init():
             assert num_of_nodes > 0
             toolbox.register("init", inits.fixed_number_random, num_of_nodes)
         else:
-            prob_to_set_node = float(config.INIT_ARG)
+            prob_to_set_node = float(config.INIT_ARG[0])
             assert prob_to_set_node >= 0.0
             assert prob_to_set_node <= 1.0
             toolbox.register("init", inits.flexible_random, prob_to_set_node)
@@ -132,7 +134,6 @@ def run(doSave=True, show=True):
     toolbox.decorate("mutate", his.decorator)
 
     pop = toolbox.population(n=config.POP_SIZE)
-    his.update(pop)
 
     hof = tools.HallOfFame(config.HOF_NUM)
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
@@ -142,7 +143,7 @@ def run(doSave=True, show=True):
     if doSave:
         save(hof, logbook, pop, his, show)
 
-def save(hof, logbook, pop, his, show=True):
+def save(hof, logbook, pop, his, show=True, save_his=False):
     """does a lot of stuff after the ga to store data, plot data and the
     Statistics.
 
@@ -152,8 +153,6 @@ def save(hof, logbook, pop, his, show=True):
     :his: the history
 
     """
-    pprint(vars(his))
-    plot_helper.history(his, toolbox)
 
     my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", hof[0],
             config.POSITIONS)
@@ -167,6 +166,11 @@ def save(hof, logbook, pop, his, show=True):
     plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
     plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
 
-    if config.PLACEMENT_TYPE != config.LIST:
+    if config.PLACEMENT_TYPE == config.AREA and False:
         plot_helper.map(hof[0],"best_individual_after_end")
         plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
+
+    if save_his:
+        his.update(pop)
+        pprint(vars(his))
+        plot_helper.history(his, toolbox)

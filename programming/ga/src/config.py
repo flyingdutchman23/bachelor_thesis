@@ -74,8 +74,6 @@ LENG = 3 * [None]
 IND_LEN = None
 # for simple version: the maximum distance to communicate, to receive packets
 MAX_DIST = None
-#for simple version: the real distance between each cell of the matrix
-REAL_DIST_CELL = None
 #for RaLaNS version: the minimum signal strength, so that there can be a connection.
 THRESHOLD = None
 # the starting height for the cube
@@ -128,6 +126,65 @@ def create_result_folder(type_name, placement_name):
         sys.exit(gen_error_message('save folder exists already, \
                 it should not! The folder is: ', FOLDER))
 
+def read_header(headerfile):
+    """reads the header, the first 2 lines, of the file, which specifies that.
+
+    :headerfile: the path to the file
+    :returns: TODO
+
+    """
+
+    global PLACEMENT_TYPE, LENG, STEPSIZE, POSITIONS, IND_LEN, BORDERS
+    first_line = headerfile.readline()
+    first_line = ralans_helper.conv_byte_to_str(first_line)
+    second_line = ralans_helper.conv_byte_to_str(headerfile.readline())
+    assert first_line == second_line, \
+            "Currently just files with the same receiver \
+            and transmitter can be parsed"
+
+    headtr = np.loadtxt(io.StringIO(first_line), delimiter=" ")
+    PLACEMENT_TYPE = headtr[0]
+    BORDERS, stepsizes, height, length = ralans_helper.parseHead(headtr,
+            PLACEMENT_TYPE)
+    if PLACEMENT_TYPE == AREA or PLACEMENT_TYPE == CUBIC:
+        if TYPE == RALANS:
+            assert height[0] == COVERAGE_LEVEL
+            assert height[1] == COVERAGE_MAX_LEVEL
+        LENG = length
+
+        # set the stepsize according to the PLACEMENT_TYPE
+        if PLACEMENT_TYPE == AREA:
+            assert stepsizes[0] == stepsizes[1], "uneven stepsizes not supported"
+            STEPSIZE = stepsizes[0]
+        elif PLACEMENT_TYPE == CUBIC:
+            assert stepsizes[0] == stepsizes[1] == stepsizes[2]
+            STEPSIZE = stepsizes[0]
+
+        # maybe also good to have for the AREA and CUBIC
+        POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
+
+        # if placement type is cubic or area, then the lenght of an individual
+        # is just the multiplicaion of the length in each axis
+
+        IND_LEN = np.prod(LENG)
+        print('LENG: ', LENG)
+        print('IND_LEN: ', IND_LEN)
+        print('len(POSITIONS): ', len(POSITIONS))
+        assert IND_LEN == len(POSITIONS)
+
+    elif PLACEMENT_TYPE == LIST:
+        if math.floor(length) == int(length):
+            IND_LEN = int(length)
+        else:
+            sys.exit(gen_error_message('error for IND_LEN cast to int: ', IND_LEN))
+        POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
+        assert IND_LEN == len(POSITIONS)
+        LENG[XAXIS] = len(POSITIONS)
+        LENG[YAXIS] = 1
+        LENG[ZAXIS] = 1
+
+    headerfile.close()
+
 def fill_config(configfile):
     """
     fill the config global variables with the values given by the config argument. Quits,
@@ -158,113 +215,35 @@ def fill_config(configfile):
         globals()[argument_name] = int(globals()[argument_name])
 
 
-    global TYPE, MAX_DIST, BORDERS, REAL_DIST_CELL, PLACEMENT_TYPE, STEPSIZE
+    global TYPE, MAX_DIST, BORDERS, PLACEMENT_TYPE, STEPSIZE
     global COVERAGE_LEVEL, COVERAGE_MAX_LEVEL, LENG, POSITIONS, IND_LEN
     global FILENAME, THRESHOLD
 
     TYPE = int(config['data']['TYPE'])
-    print('type init: ',type(INIT))
 
     if TYPE == PROTOTYPE:
         TYPE_NAME = 'prototype'
+        FILENAME = config['data']['prototype']['FILENAME']
         MAX_DIST = config['data']['prototype']['MAX_DIST']
-        BORDERS = config['data']['prototype']['BORDERS']
-        print('borders',BORDERS)
-        BORDERS = [int(i) for i in BORDERS]
-        REAL_DIST_CELL = config['data']['prototype']['REAL_DIST_CELL']
-        PLACEMENT_TYPE = int(config['data']['prototype']['PLACEMENT_TYPE'])
-        STEPSIZE = config['data']['prototype']['STEPSIZE']   
-
-        if PLACEMENT_TYPE == CUBIC:
-            COVERAGE_LEVEL = config['data']['prototype']['cubic']['COVERAGE_LEVEL']   
-            COVERAGE_MAX_LEVEL = config['data']['prototype']['cubic']['COVERAGE_MAX_LEVEL']   
-            LENG[ZAXIS] = COVERAGE_MAX_LEVEL - COVERAGE_LEVEL
-        elif PLACEMENT_TYPE == LIST:
-            POSITIONS = config['data']['prototype']['list']['POSITIONS']   
-        elif PLACEMENT_TYPE == AREA:
-            LENG[XAXIS] = BORDERS[2] - BORDERS[0] + 1
-            LENG[YAXIS] = BORDERS[3] - BORDERS[1] + 1
-            LENG[ZAXIS] = 1
-        else:
-            sys.exit('PLACEMENT_TYPE not available')
-
-        # set the length of an individual
-        if PLACEMENT_TYPE == LIST:
-            IND_LEN = len(POSITIONS)
-        else:
-            # if it is a cubic or an area, then the length is just the product of the
-            # length in each dimension
-            IND_LEN = np.prod(LENG)
-            print('IND_LEN in config: ',IND_LEN)
+        resfile = open(FILENAME)
+        read_header(resfile)
 
     elif TYPE == RALANS:
         TYPE_NAME = 'ralans'
         FILENAME = config['data']['ralans']['FILENAME']
-        print('filename in config: ', FILENAME)
-        print('type filename in config: ', type(FILENAME))
         THRESHOLD = config['data']['ralans']['THRESHOLD']
 
         resfile, ralans_configfile, _ = ralans_helper.getFiles(FILENAME)
 
         ralans_config = ralans_helper.parseConfigFile(ralans_configfile, isZip=True)
         STEPSIZE = ralans_config['stepSize']
-        REAL_DIST_CELL = STEPSIZE
         COVERAGE_LEVEL = ralans_config['coverageLevel']
         COVERAGE_MAX_LEVEL = ralans_config['coverageMaxLevel']
         MAX_DIST = ralans_config['maxRange']
 
         # to read the header of the result RaLaNS file
-        first_line = None
-        print('MAX_DIST: ', MAX_DIST)
-        print('STEPSIZE: ', STEPSIZE)
-        print('COVERAGE_LEVEL', COVERAGE_LEVEL)
-        print('COVERAGE_MAX_LEVEL', COVERAGE_MAX_LEVEL)
-        print('resfile: ', resfile)
-        first_line = ralans_helper.conv_byte_to_str(resfile.readline())
-        second_line = ralans_helper.conv_byte_to_str(resfile.readline())
-        assert first_line == second_line, \
-                "Currently just files with the same receiver \
-                and transmitter can be parsed"
+        read_header(resfile)
 
-        headtr = np.loadtxt(io.StringIO(first_line), delimiter=" ")
-        PLACEMENT_TYPE = headtr[0]
-        BORDERS, stepsizes, height, length = ralans_helper.parseHead(headtr, PLACEMENT_TYPE)
-        if PLACEMENT_TYPE == AREA or PLACEMENT_TYPE == CUBIC:
-            assert height[0] == COVERAGE_LEVEL
-            assert height[1] == COVERAGE_MAX_LEVEL
-            LENG = length
-
-            # set the stepsize according to the PLACEMENT_TYPE
-            if PLACEMENT_TYPE == AREA:
-                assert stepsizes[0] == stepsizes[1]
-                STEPSIZE = stepsizes[0]
-            elif PLACEMENT_TYPE == CUBIC:
-                assert stepsizes[0] == stepsizes[1] == stepsizes[2]
-                STEPSIZE = stepsizes[0]
-
-            # maybe also good to have for the AREA and CUBIC
-            POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
-
-            # if placement type is cubic or area, then the lenght of an individual is just
-            # the multiplicaion of the length in each axis
-
-            IND_LEN = np.prod(LENG)
-            assert IND_LEN == len(POSITIONS)
-
-        elif PLACEMENT_TYPE == LIST:
-            if math.floor(length) == int(length):
-                IND_LEN = int(length)
-            else:
-                sys.exit(gen_error_message('error for IND_LEN cast to int: ', IND_LEN))
-            POSITIONS = ralans_helper.parseTransmitterHeader(headtr)
-            print('length: ', length)
-            print('POSITIONS: ', POSITIONS)
-            assert IND_LEN == len(POSITIONS)
-            LENG[XAXIS] = len(POSITIONS)
-            LENG[YAXIS] = 1
-            LENG[ZAXIS] = 1
-
-        resfile.close()
     else:
         sys.exit(gen_error_message('error for TYPE', TYPE))
 

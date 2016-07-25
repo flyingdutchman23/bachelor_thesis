@@ -143,3 +143,8 @@ def load_dict(filepath):
     assert isinstance(dictionary, dict)
 
     return dictionary
+
+def frange(x, y, jump):
+  while x <= y:
+    yield x
+    x += jump
