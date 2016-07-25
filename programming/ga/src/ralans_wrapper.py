@@ -62,12 +62,14 @@ def read_resultfile(filename, isZip=True):
         f = filename
     else:
         f = open(filename)
+    first_line = f.readline()
+    second_line = f.readline()
 
-    print('1st line: ', f.readline())
-    print('2nd line: ', f.readline())
-    print('size YAXIS * ZAXIS: ', config.LENG[YAXIS] * config.LENG[ZAXIS])
-    print('config.IND_LEN: ', config.IND_LEN)
-    print('config.LENG: ', config.LENG)
+    # print('1st line: ', first_line)
+    # print('2nd line: ', second_line)
+    # print('size YAXIS * ZAXIS: ', config.LENG[YAXIS] * config.LENG[ZAXIS])
+    # print('config.IND_LEN: ', config.IND_LEN)
+    # print('config.LENG: ', config.LENG)
 
     # assert config.PLACEMENT_TYPE in [config.CUBIC, config.AREA], \
             # "Only AREA and CUBIC for testing!"
@@ -143,11 +145,25 @@ def get_signal(trid, recid):
     """
     return signals[trid][recid]
 
+def get_signal_by_pos(trans, rec):
+    """returns the signal value for the connection from the given transmitter to
+    the given receiver
+
+    :trans: the position of the transmitter as a list
+    :rec: the position of the receiver as a list
+    :returns: the signal strength
+
+    """
+    trid = get_nextid_by_pos(trans, config.POSITIONS)
+    recid = get_nextid_by_pos(rec, config.POSITIONS)
+    return signals[trid][recid]
+
 def packet_received_by_id(trid, recid):
-    """calculates whether or not there is a connection from the transmitter given by its
-    id to the receiver given by its id. Returns the result as a boolean. The THRESHOLD
-    argument is important for this, because this function compares the result with that
-    value to decide whether there is a connection or not.
+    """calculates whether or not there is a connection from the transmitter
+    given by its id to the receiver given by its id. Returns the result as a
+    boolean. The THRESHOLD argument is important for this, because this function
+    compares the result with that value to decide whether there is a connection
+    or not.
 
     :trid: the id of the transmitter
     :recid: the id of the receiver
@@ -157,7 +173,7 @@ def packet_received_by_id(trid, recid):
     """
     return get_signal(trid, recid) > config.THRESHOLD
 
-def packet_received_by_positions(transmitter, receiver):
+def packet_received_by_positions(trans, rec):
     """TODO: Docstring for packet_received.
 
     :transmitter: TODO
@@ -165,6 +181,4 @@ def packet_received_by_positions(transmitter, receiver):
     :returns: TODO
 
     """
-    trid = getTransmitterID(transmitter, config.POSITIONS, config.STEPSIZE, True)
-    recid = getTransmitterID(receiver, config.POSITIONS, config.STEPSIZE, True)
-    return packet_received_with_id(trid, recid)
+    return get_signal_by_pos(trans, rec)

@@ -110,19 +110,18 @@ def getTransmitters(filename, isZip=False):
     return transmitters
 
 
-def getTransmitterID(reqTr, transmitters, stepsize=1):
+def get_nextid_by_pos(reqpos, positions, max_dist=float('inf')):
 
-    assert reqTr is not None
-    trid = -1
+    trid = None
+    min_dist = float('inf')
 
-    for i, tr in enumerate(transmitters):
-        tr = np.array(tr)
-        if np.linalg.norm(reqTr - tr) < stepsize / 2.:
+    for i, pos in enumerate(positions):
+        dist = np.linalg.norm(np.subtract(reqpos,pos))
+        if dist < min_dist and dist <= max_dist:
             trid = i
-            break
-        i += 1
+            min_dist = dist
 
-    if trid == -1:
+    if trid == None:
         print("Transmitter not found")
 
     return trid
@@ -178,7 +177,7 @@ def parseBorders(input):
     return np.loadtxt(io.StringIO(input.strip()), delimiter=" ").tolist()
 
 def parseTransmitterHeader(head):
-    print("header: ",head)
+    # print("header: ",head)
     transmitters = []
     transmitterType = int(head[0])
 
