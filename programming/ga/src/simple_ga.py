@@ -40,12 +40,13 @@ from constants import RALANS
 import config
 #to use some util functions
 import my_util
-# TODO activate later
 import plot_helper
 import print_helper
 import init_functions as inits
 import mate_functions as mates
 import mutate_functions as mutates
+import select_functions as selects
+import replace_functions as replaces
 import ralans_wrapper as ralans
 
 
@@ -57,6 +58,10 @@ stats.register("avg", np.mean)
 stats.register("std", np.std)
 stats.register("min", np.min)
 stats.register("max", np.max)
+
+hof_stats = tools.Statistics(lambda ind: ind.fitness.values)
+hof_stats.register("hof_max", np.max)
+
 
 #specify individual, creation of it
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -119,9 +124,18 @@ def init():
         sys.exit('Wrong mutate function!')
 
     if config.SELECT == 0:
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("select", selects.selTournament, tournsize=3)
     elif config.SELECT == 1:
         sys.exit('this option is not implemented yet!')
+    else:
+        sys.exit('Wrong select function!')
+
+    if config.REPLACE == 0:
+        toolbox.register("replace", replaces.repTournament, tournsize=3)
+    elif config.SELECT == 1:
+        toolbox.register("replace", replaces.repParents)
+    elif config.SELECT == 2:
+        toolbox.register("replace", replaces.repRandom)
     else:
         sys.exit('Wrong select function!')
 
@@ -141,7 +155,7 @@ def run(doSave=True, show=True):
     pool = multiprocessing.Pool()
     toolbox.register("map", pool.map)
 
-    pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
+    pop, logbook = eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
             mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
@@ -179,3 +193,128 @@ def save(hof, logbook, pop, his, show=True, save_his=False):
         his.update(pop)
         pprint(vars(his))
         plot_helper.history(his, toolbox)
+
+def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
+             halloffame=None, verbose=__debug__):
+    """This algorithm reproduce the simplest evolutionary algorithm as
+    presented in chapter 7 of [Back2000]_.
+    
+    :param pop: A list of individuals.
+    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
+                    operators.
+    :param cxpb: The probability of mating two individuals.
+    :param mutpb: The probability of mutating an individual.
+    :param ngen: The number of generation.
+    :param stats: A :class:`~deap.tools.Statistics` object that is updated
+                  inplace, optional.
+    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
+                       contain the best individuals, optional.
+    :param verbose: Whether or not to log the statistics.
+    :returns: The final population and a :class:`~deap.tools.Logbook`
+              with the statistics of the evolution.
+    
+    The algorithm takes in a population and evolves it in place using the
+    :meth:`varAnd` method. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution (if
+    any). The logbook will contain the generation number, the number of
+    evalutions for each generation and the statistics if a
+    :class:`~deap.tools.Statistics` if any. The *cxpb* and *mutpb* arguments
+    are passed to the :func:`varAnd` function. The pseudocode goes as follow
+    ::
+
+        evaluate(population)
+        for g in range(ngen):
+            population = select(population, len(population))
+            offspring = varAnd(population, toolbox, cxpb, mutpb)
+            evaluate(offspring)
+            population = offspring
+
+    As stated in the pseudocode above, the algorithm goes as follow. First, it
+    evaluates the individuals with an invalid fitness. Second, it enters the
+    generational loop where the selection procedure is applied to entirely
+    replace the parental population. The 1:1 replacement ratio of this
+    algorithm **requires** the selection procedure to be stochastic and to
+    select multiple times the same individual, for example,
+    :func:`~deap.tools.selTournament` and :func:`~deap.tools.selRoulette`.
+    Third, it applies the :func:`varAnd` function to produce the next
+    generation population. Fourth, it evaluates the new individuals and
+    compute the statistics on this population. Finally, when *ngen*
+    generations are done, the algorithm returns a tuple with the final
+    population and a :class:`~deap.tools.Logbook` of the evolution.
+
+    .. note::
+
+        Using a non-stochastic selection method will result in no selection as
+        the operator selects *n* individuals from a pool of *n*.
+    
+    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
+    
+    .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
+       Basic Algorithms and Operators", 2000.
+    """
+    hof_fit = None
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals']\
+            + (stats.fields if stats else [])\
+            + (hof_stats.fields if hof_stats else [])
+
+    # Evaluate the individuals with an invalid fitness
+    invalid_ind = [ind for ind in pop if not ind.fitness.valid]
+    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
+
+    halloffame.update(pop)
+
+    record = stats.compile(pop) if stats else {}
+    hof_record = hof_stats.compile(halloffame) if hof_stats else {}
+    record.update(hof_record)
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
+    if verbose:
+        print(logbook.stream)
+
+    # Begin the generational process
+    for gen in range(1, ngen+1):
+
+        # Select the next generation individuals
+        # round it to an even number, because uneven is unnecessary for
+        # crossover
+        offspr_size = int(len(pop) * cxpb) & (-2)
+        _, offspr_idxs = toolbox.select(pop, offspr_size)
+        offspr = [toolbox.clone(ind) for ind in pop]
+
+        # Apply crossover and mutation on the offspring
+        for i in range(0,len(offspr_idxs),2):
+            offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]] = toolbox.mate(
+                    offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]])
+            del offspr[offspr_idxs[i-1]].fitness.values,\
+                    offspr[offspr_idxs[i]].fitness.values
+
+        for i in range(len(offspr)):
+            if random.random() < mutpb:
+                offspr[i], = toolbox.mutate(offspr[i])
+                del offspr[i].fitness.values
+        
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offspr if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+        
+        # Update the hall of fame with the generated individuals
+        halloffame.update(invalid_ind)
+
+        pop[:] = toolbox.replace(pop, invalid_ind, offspr)
+
+        # Append the current generation statistics to the logbook
+        record = stats.compile(pop) if stats else {}
+        hof_record = hof_stats.compile(halloffame) if hof_stats else {}
+        record.update(hof_record)
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print(logbook.stream)        
+
+    return pop, logbook

@@ -40,7 +40,7 @@ MUTATE_PROB = None
 # probability the a bit in an individual is flipped
 MUTATE_IND_PROB = None
 # to specify which selection function should be used
-SELECTION = None
+SELECT = None
 # to specify the probability that an individual will be used for the selection.
 SELECT_PROB = None
 # to specify which reproduction function should be used
@@ -53,6 +53,8 @@ INIT_ARG = None
 FITNESS = None
 # to specify the number of individuals, which are saved in the hall of fame
 HOF_NUM = None
+# to specify which replacement function should be used
+REPLACE = None
 
 # the positions on the map, which should be evaluated.
 POSITIONS = None	
@@ -204,7 +206,8 @@ def fill_config(configfile):
     else:
         sys.exit(gen_error_message('Validation incorrect!!!', test_passed))
     
-    genetic_arg_options = ['MUTATE', 'SELECT', 'MATE', 'INIT', 'FITNESS']
+    genetic_arg_options = ['MUTATE', 'SELECT', 'REPLACE', 'MATE', 'INIT', 
+            'FITNESS']
     genetic_args = list(genetic_arg_options)
     genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
         'MUTATE_PROB','INIT_ARG','HOF_NUM'])

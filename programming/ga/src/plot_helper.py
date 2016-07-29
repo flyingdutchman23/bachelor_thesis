@@ -53,6 +53,7 @@ def avg_min_max(logbook,save=True,to_show=True):
     fit_mins = logbook.select("min")
     fit_maxs = logbook.select("max")
     fit_avgs = logbook.select("avg")
+    fit_hof = logbook.select("hof_max")
 
     fig, ax1 = plt.subplots()
     #print("gen",gen)
@@ -60,12 +61,13 @@ def avg_min_max(logbook,save=True,to_show=True):
     line1 = ax1.plot(gen, fit_mins, "b", label="Minimum Fitness")
     line2 = ax1.plot(gen, fit_maxs, "g", label="Maximum Fitness")
     line3 = ax1.plot(gen, fit_avgs, "r", label="Average Fitness")
+    line4 = ax1.plot(gen, fit_hof, "y", label="Hall of Fame")
     ax1.set_xlabel("Generation")
     ax1.set_ylabel("Fitness")
     # for tl in ax1.get_yticklabels():
         # tl.set_color("b")
 
-    lns = line1 + line2 + line3
+    lns = line1 + line2 + line3 + line4
     labs = [l.get_label() for l in lns]
     ax1.legend(lns, labs, loc="center right")
 
