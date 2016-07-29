@@ -116,7 +116,7 @@ def graph_received_packets(individual, nodes=None):
     # computed and summed up
     for probe in range(config.IND_LEN):
         for node_index, node in enumerate(nodes):
-            if packet_received(probe, node) == True:
+            if packet_received(probe, node) and packet_received(node, probe):
                 g.add_edge(probe_node,g.vertex(node_index))
         labeling = gt.label_out_component(g,probe_node)
         num_received_packets += sum(labeling.a)
@@ -143,7 +143,7 @@ def build_graph(nodes):
     for node_index1, node1 in enumerate(nodes):
         for node_index2 in range((node_index1+1),num_of_nodes):
             node2 = nodes[node_index2]
-            if node_index1 != node_index2 and packet_received(node1,node2):
+            if packet_received(node1,node2) and packet_received(node2,node1):
                 g.add_edge(g.vertex(node_index1),g.vertex(node_index2))
 
     return g
