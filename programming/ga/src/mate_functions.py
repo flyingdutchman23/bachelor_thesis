@@ -14,7 +14,6 @@ import config
 
 import print_helper
 
-#TODO add mate function from Lochert2008c, which keeps the number of nodes equal
 def lochert_mate(ind1,ind2):
     """calculates the child of the mating process done by the 2 given individual. It 
     generates just 1 child.
@@ -31,13 +30,9 @@ def lochert_mate(ind1,ind2):
 
     """
     
-    # the need to have the same length, because the number of nodes should be fixed, when
-    # using this function
-    # assert sum(ind1) == sum(ind2)
-
-    # print("Before MATE !!!!")
-    # print_helper.individual(ind1)
-    # print_helper.individual(ind2)
+    # the need to have the same length, because the number of nodes should be
+    # fixed, when using this function
+    assert sum(ind1) == sum(ind2)
 
     remaining_nodes = []
     # to count the total number of nodes 
@@ -45,31 +40,22 @@ def lochert_mate(ind1,ind2):
     # to count the number of nodes set in the child
     count_set = 0
     
-    for index in range(config.IND_LEN):
-        if ind1[index] ==  1:
-            count_total += 1
-            if ind2[index] == 1:
-                ind1[index] = 1
-                count_set += 1
-            else:
-                remaining_nodes.append(index)
-                ind1[index] = 0
-        elif ind2[index] == 1:
-            remaining_nodes.append(index)
-            ind1[index] = 0
-        else:
-            ind1[index] = 0
+    for i in range(len(ind1)):
+        count_total += ind1[i] + ind2[i]
+        if ind1[i] != ind2[i]:
+            remaining_nodes.append(i)
+        ind1[i] = ind1[i] and ind2[i]
+        ind2[i] = ind1[i]
+        count_set += ind1[i]
 
-    remaining_nodes = random.sample(remaining_nodes,count_total - count_set)
+    remain_num = int(count_total/2 - count_set)
+    add1 = random.sample(remaining_nodes,remain_num)
+    add2 = random.sample(remaining_nodes,remain_num)
 
-    for node in remaining_nodes:
+    for node in add1:
         ind1[node] = 1
 
-    # print()
-    # print("After MATE !!!!")
-    # print_helper.individual(ind1)
-    # print_helper.individual(ind2)
-    # print("sum individual 1:",sum(ind1))
-    # print("sum individual 2:",sum(ind2))
+    for node in add2:
+        ind2[node] = 1
 
     return ind1, ind2
