@@ -54,20 +54,25 @@ toolbox = base.Toolbox()
 
 #which values to measure for the fitnesses of the individuals
 stats = tools.Statistics(lambda ind: ind.fitness.values)
-stats.register("avg", np.mean)
-stats.register("std", np.std)
-stats.register("min", np.min)
-stats.register("max", np.max)
+stats.register("avg", np.mean, axis=0)
+stats.register("std", np.std, axis=0)
+stats.register("min", np.amin, axis=0)
+stats.register("max", np.amax, axis=0)
 
 hof_stats = tools.Statistics(lambda ind: ind.fitness.values)
-hof_stats.register("hof_max", np.max)
+hof_stats.register("hof_max", np.amax, axis=0)
 
 
 #specify individual, creation of it
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+# just default, so that it works with parallel
+creator.create("MYFIT", base.Fitness, weights=(0.0,))
+creator.create("Individual", array.array, typecode='b', fitness=creator.MYFIT)
 
 def init():
+
+    creator.create("MYFIT", base.Fitness, weights=config.WEIGHTS)
+    creator.create("Individual", array.array, typecode='b',
+            fitness=creator.MYFIT)
 
     #which functions to use for specific part of ga
     if config.FITNESS == 0:
@@ -94,9 +99,11 @@ def init():
             assert prob_to_set_node <= 1.0
             toolbox.register("init", inits.flexible_random, prob_to_set_node)
         #registers function to init individual
-        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.init)
+        toolbox.register("individual", tools.initIterate, creator.Individual,
+                toolbox.init)
         #how to init hole population -> in list
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox.register("population", tools.initRepeat, list,
+                toolbox.individual)
 
     elif config.INIT in [3,4]:
         toolbox.register("population", inits.best_samples, config.INIT_ARG,
@@ -181,7 +188,8 @@ def save(hof, logbook, pop, his, show=True, save_his=False):
     my_util.save_dict(config.FOLDER+"history_tree.ser",
             his.genealogy_tree)
 
-    plot_helper.avg_min_max(logbook)
+    plot_helper.avg_min_max(logbook, col=0, name='spne_stats')
+    plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats')
     plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
     plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
 

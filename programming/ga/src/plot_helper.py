@@ -48,16 +48,17 @@ def draw_individual_graph(individual,name):
     gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=12, 
             output=config.FOLDER+name, output_size=output_size)
 
-def avg_min_max(logbook,save=True,to_show=True):
-    gen = logbook.select("gen")
-    fit_mins = logbook.select("min")
-    fit_maxs = logbook.select("max")
-    fit_avgs = logbook.select("avg")
-    fit_hof = logbook.select("hof_max")
+def avg_min_max(logbook,save=True,to_show=True, col=0, name = "Statistics"):
+
+    assert col in [0,1]
+
+    gen = np.array(logbook.select("gen"))
+    fit_mins = np.array(logbook.select("min"))[:,col]
+    fit_maxs = np.array(logbook.select("max"))[:,col]
+    fit_avgs = np.array(logbook.select("avg"))[:,col]
+    fit_hof = np.array(logbook.select("hof_max"))[:,col]
 
     fig, ax1 = plt.subplots()
-    #print("gen",gen)
-    #print("fit_mins",fit_mins)
     line1 = ax1.plot(gen, fit_mins, "b", label="Minimum Fitness")
     line2 = ax1.plot(gen, fit_maxs, "g", label="Maximum Fitness")
     line3 = ax1.plot(gen, fit_avgs, "r", label="Average Fitness")
@@ -73,7 +74,6 @@ def avg_min_max(logbook,save=True,to_show=True):
 
     #save the plot
     if save:
-        name = "Statistics"
         fig.savefig(config.FOLDER+name)
 
     if to_show:

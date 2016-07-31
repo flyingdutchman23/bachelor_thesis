@@ -172,4 +172,4 @@ def graph_evaluate(individual):
     assert spne <= 1
     assert spne >= 0
 
-    return spne,
+    return spne, num_of_nodes

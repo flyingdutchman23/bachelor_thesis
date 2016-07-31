@@ -55,6 +55,8 @@ FITNESS = None
 HOF_NUM = None
 # to specify which replacement function should be used
 REPLACE = None
+# to specify the weight of the SPNE fitness compared to the number of nodes
+WEIGHTS = None
 
 # the positions on the map, which should be evaluated.
 POSITIONS = None	
@@ -210,13 +212,17 @@ def fill_config(configfile):
             'FITNESS']
     genetic_args = list(genetic_arg_options)
     genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
-        'MUTATE_PROB','INIT_ARG','HOF_NUM'])
+        'MUTATE_PROB','INIT_ARG','HOF_NUM', 'WEIGHTS'])
 
     for argument_name in genetic_args:
         globals()[argument_name] = config['genetic_algorithm'][argument_name]
     for argument_name in genetic_arg_options:
         globals()[argument_name] = int(globals()[argument_name])
 
+    # convert the list into a tuple of float to be compatible with DEAP
+    global WEIGHTS
+    WEIGHTS = [float(weight) for weight in WEIGHTS]
+    WEIGHTS = tuple(WEIGHTS)
 
     global TYPE, MAX_DIST, BORDERS, PLACEMENT_TYPE, STEPSIZE
     global COVERAGE_LEVEL, COVERAGE_MAX_LEVEL, LENG, POSITIONS, IND_LEN
