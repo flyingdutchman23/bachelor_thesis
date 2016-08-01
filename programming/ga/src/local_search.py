@@ -148,14 +148,11 @@ def save(pop, logbook, show=True):
 
 def local_search(pop, toolbox, stats=None,
              halloffame=None, verbose=__debug__):
-    """This algorithm is my simple genetic algorithm.
+    """This algorithm is my simple local search for the fixed version.
     
     :param pop: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param cxpb: The probability of mating two individuals.
-    :param mutpb: The probability of mutating an individual.
-    :param ngen: The number of generation.
     :param stats: A :class:`~deap.tools.Statistics` object that is updated
                   inplace, optional.
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
