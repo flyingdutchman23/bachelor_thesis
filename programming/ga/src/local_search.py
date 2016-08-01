@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+import time
 import argparse
 #to randomize the initilization part
 import random
@@ -164,7 +165,7 @@ def local_search(pop, toolbox, stats=None,
     """
     
     logbook = tools.Logbook()
-    logbook.header = ['gen']\
+    logbook.header = ['gen', 'nevals', 'time']\
             + (stats.fields if stats else [])\
             + (hof_stats.fields if hof_stats else [])
 
@@ -176,6 +177,7 @@ def local_search(pop, toolbox, stats=None,
     # halloffame.update(pop)
 
     # Begin the generational process
+    assert len(pop) == 1
     num_of_nodes = sum(pop[0])
     finished = [False] * num_of_nodes
     nodes = list(np.nonzero(pop[0])[0])
@@ -189,7 +191,7 @@ def local_search(pop, toolbox, stats=None,
     record = stats.compile(fitnesses) if stats else {}
     hof_record = hof_stats.compile([pop[0].fitness.values]) if hof_stats else {}
     record.update(hof_record)
-    logbook.record(gen=gen, **record)
+    logbook.record(gen=gen, nevals=1, time=time.time(), **record)
     if verbose:
         print(logbook.stream)        
 
@@ -234,9 +236,8 @@ def local_search(pop, toolbox, stats=None,
         hof_record = hof_stats.compile([fitnesses[max_idx]]) if hof_stats\
                 else {}
         record.update(hof_record)
-        logbook.record(gen=gen, **record)
-        print("Logbook: ")
-        print(logbook)
+        logbook.record(gen=gen, nevals=len(fitnesses), time=time.time(),
+                **record)
         if verbose:
             print(logbook.stream)        
 
