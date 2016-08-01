@@ -13,7 +13,8 @@ def main():
     args = parser.parse_args()
     config.fill_config(args.configfile)
     simple_ga.init()
-    print("after init")
+    print("after init!!!")
+    print()
     simple_ga.run()
 
     

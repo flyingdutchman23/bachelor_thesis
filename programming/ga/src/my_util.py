@@ -29,20 +29,20 @@ def onedpos_to_2dpos(pos, positions):
 
 def calc_borders(positions):
     borders = [None] * 6
-    
+
     positions = np.array(positions)
     mins = np.amin(positions, axis=0)
     assert len(mins) == 3, 'Mins: ' + str(mins)
 
     borders[:3] = mins[:]
-    
+
     maxs = np.amax(positions, axis=0)
     assert len(maxs) == 3
 
     borders[3:] = maxs[:]
 
     return borders
-    
+
 def isin_borders(bigger_borders, smaller_borders):
     """checks whether the smaller area specified by the smaller borders is in the area
     specified by the bigger borders.
@@ -70,7 +70,7 @@ def remove_border_axis(borders, axis=ZAXIS, dim=DIM):
     :returns: TODO
 
     """
-    
+
     borders = copy.deepcopy(borders)
     del borders[dim + axis]
     del borders[axis]
@@ -112,6 +112,58 @@ def save_node_positions(filepath, individual, positions):
 
     output.close()
 
+def save_ind_txt(filepath, ind):
+    """save an individual to a txt file
+
+    """
+    output = open(filepath, "w")
+
+    for i in ind:
+        output.write(str(i))
+
+    output.write("\n")
+
+    output.close()
+
+def save_ind(filepath, ind):
+    """save an individual to a txt file
+
+    """
+    output = open(filepath, "wb")
+
+    pickle.dump(ind, output)
+
+    output.close()
+
+def load_ind(filepath, weights=(1.0,)):
+    """save an individual to a txt file
+
+    """
+    input_ind = open(filepath, "rb")
+
+    creator.create("MYFIT", base.Fitness, weights=weights)
+    creator.create("Individual", array.array, typecode='b',
+            fitness=creator.FitnessMax)
+
+    ind = pickle.load(input_ind)
+    output.close()
+
+    return ind
+
+def save_logbook(filepath, log):
+    """save the logbook
+
+    """
+    output = open(filepath,'wb')
+    pickle.dump(log, output)
+    output.close()
+
+def load_logbook(filepath):
+
+    input_log = open(filepath,'rb')
+    logbook = pickle.load(input_log)
+    return log
+
 def save_dict(filepath, dictionary):
     """save a dictionary object to a file for persistence.
 
@@ -123,7 +175,7 @@ def save_dict(filepath, dictionary):
     pickle.dump(dictionary, output)
     output.close()
 
-def load_dict(filepath):
+def load_dict(filepath, weights=(1.0,)):
     """load a dictionary, which was saved with save_dict before from a specified
     file.
 
@@ -132,19 +184,19 @@ def load_dict(filepath):
 
     """
 
-    creator.create("FitnessMax", base.Fitness, weights=())
-    creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+    creator.create("MYFIT", base.Fitness, weights=weights)
+    creator.create("Individual", array.array, typecode='b',
+            fitness=creator.FitnessMax)
 
     input_dict = open(filepath, 'rb')
     dictionary = pickle.load(input_dict)
     input_dict.close()
 
-    print('Mydict: ', dictionary)
     assert isinstance(dictionary, dict)
 
     return dictionary
 
 def frange(x, y, jump):
-  while x <= y:
-    yield x
+    while x <= y:
+        yield x
     x += jump

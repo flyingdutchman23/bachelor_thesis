@@ -86,7 +86,6 @@ def init():
 
     # Choose init function
     if config.INIT in [0,1,2]:
-
         if config.INIT == 0:
             toolbox.register("init", inits.normal_random)
         elif config.INIT == 1:
@@ -124,21 +123,26 @@ def init():
         toolbox.register("mutate", tools.mutFlipBit,
                 indpb=config.MUTATE_IND_PROB)
     elif config.MUTATE == 1:
-        toolbox.register("mutate", mutates.lochert_mutate_one)
+        toolbox.register("mutate", tools.mutFlipBit,
+                indpb=float(1 / config.IND_LEN))
     elif config.MUTATE == 2:
-        sys.exit('this option is not implemented yet!')
+        toolbox.register("mutate", mutates.lochert_mutate_one)
     else:
         sys.exit('Wrong mutate function!')
 
     if config.SELECT == 0:
-        toolbox.register("select", selects.selTournament, tournsize=3)
+        tournsize = int(config.SELECT_ARG[0])
+        toolbox.register("select", selects.selTournament,
+                tournsize=tournsize)
     elif config.SELECT == 1:
-        sys.exit('this option is not implemented yet!')
+        toolbox.register("select", selects.random)
     else:
         sys.exit('Wrong select function!')
 
     if config.REPLACE == 0:
-        toolbox.register("replace", replaces.repTournament, tournsize=3)
+        tournsize = int(config.SELECT_ARG[0])
+        toolbox.register("replace", replaces.repTournament,
+                tournsize=tournsize)
     elif config.SELECT == 1:
         toolbox.register("replace", replaces.repParents)
     elif config.SELECT == 2:
@@ -151,9 +155,9 @@ def run(doSave=True, show=True):
     #to have same random numbers
     # random.seed(config.POP_SIZE)
 
-    his = tools.History()
-    toolbox.decorate("mate", his.decorator)
-    toolbox.decorate("mutate", his.decorator)
+    # his = tools.History()
+    # toolbox.decorate("mate", his.decorator)
+    # toolbox.decorate("mutate", his.decorator)
 
     pop = toolbox.population(n=config.POP_SIZE)
 
@@ -167,9 +171,9 @@ def run(doSave=True, show=True):
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
     if doSave:
-        save(hof, logbook, pop, his, show)
+        save(hof, logbook, pop, show)
 
-def save(hof, logbook, pop, his, show=True, save_his=False):
+def save(hof, logbook, pop, his=None, show=True, save_his=False):
     """does a lot of stuff after the ga to store data, plot data and the
     Statistics.
 
@@ -182,12 +186,15 @@ def save(hof, logbook, pop, his, show=True, save_his=False):
 
     my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", hof[0],
             config.POSITIONS)
+    my_util.save_ind(config.FOLDER+"best_ind.ser", hof[0])
+    my_util.save_ind_txt(config.FOLDER+"best_ind.txt", hof[0])
 
-    my_util.save_dict(config.FOLDER+"history_individuals.ser",
-            his.genealogy_history)
-    my_util.save_dict(config.FOLDER+"history_tree.ser",
-            his.genealogy_tree)
+    # my_util.save_dict(config.FOLDER+"history_individuals.ser",
+            # his.genealogy_history)
+    # my_util.save_dict(config.FOLDER+"history_tree.ser",
+            # his.genealogy_tree)
 
+    my_util.save_logbook(config.FOLDER+"logbook.ser", logbook)
     plot_helper.avg_min_max(logbook, col=0, name='spne_stats')
     plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats')
     plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
@@ -197,15 +204,14 @@ def save(hof, logbook, pop, his, show=True, save_his=False):
         plot_helper.map(hof[0],"best_individual_after_end")
         plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
 
-    if save_his:
-        his.update(pop)
-        pprint(vars(his))
-        plot_helper.history(his, toolbox)
+    # if save_his and not his == None:
+        # his.update(pop)
+        # pprint(vars(his))
+        # plot_helper.history(his, toolbox)
 
 def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
              halloffame=None, verbose=__debug__):
-    """This algorithm reproduce the simplest evolutionary algorithm as
-    presented in chapter 7 of [Back2000]_.
+    """This algorithm is my simple genetic algorithm.
     
     :param pop: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -221,46 +227,6 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
     :returns: The final population and a :class:`~deap.tools.Logbook`
               with the statistics of the evolution.
     
-    The algorithm takes in a population and evolves it in place using the
-    :meth:`varAnd` method. It returns the optimized population and a
-    :class:`~deap.tools.Logbook` with the statistics of the evolution (if
-    any). The logbook will contain the generation number, the number of
-    evalutions for each generation and the statistics if a
-    :class:`~deap.tools.Statistics` if any. The *cxpb* and *mutpb* arguments
-    are passed to the :func:`varAnd` function. The pseudocode goes as follow
-    ::
-
-        evaluate(population)
-        for g in range(ngen):
-            population = select(population, len(population))
-            offspring = varAnd(population, toolbox, cxpb, mutpb)
-            evaluate(offspring)
-            population = offspring
-
-    As stated in the pseudocode above, the algorithm goes as follow. First, it
-    evaluates the individuals with an invalid fitness. Second, it enters the
-    generational loop where the selection procedure is applied to entirely
-    replace the parental population. The 1:1 replacement ratio of this
-    algorithm **requires** the selection procedure to be stochastic and to
-    select multiple times the same individual, for example,
-    :func:`~deap.tools.selTournament` and :func:`~deap.tools.selRoulette`.
-    Third, it applies the :func:`varAnd` function to produce the next
-    generation population. Fourth, it evaluates the new individuals and
-    compute the statistics on this population. Finally, when *ngen*
-    generations are done, the algorithm returns a tuple with the final
-    population and a :class:`~deap.tools.Logbook` of the evolution.
-
-    .. note::
-
-        Using a non-stochastic selection method will result in no selection as
-        the operator selects *n* individuals from a pool of *n*.
-    
-    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
-    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox.
-    
-    .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
-       Basic Algorithms and Operators", 2000.
     """
     hof_fit = None
 

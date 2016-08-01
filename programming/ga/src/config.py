@@ -27,6 +27,7 @@ from constants import XAXIS, YAXIS, ZAXIS, DIM, LIST, AREA, CUBIC, POINT,\
 
 CONFIGSPECFILE = "./genetic_algorithm_specifications.cfg"
 ###Global Constants
+DES = None
 ###Genetic Algorithm constants
 #Population Size
 POP_SIZE = None
@@ -41,6 +42,8 @@ MUTATE_PROB = None
 MUTATE_IND_PROB = None
 # to specify which selection function should be used
 SELECT = None
+# to specify the arguments given to the selection function
+SELECT_ARG = None
 # to specify the probability that an individual will be used for the selection.
 SELECT_PROB = None
 # to specify which reproduction function should be used
@@ -55,6 +58,8 @@ FITNESS = None
 HOF_NUM = None
 # to specify which replacement function should be used
 REPLACE = None
+# to specify which arguments replacement function gets
+REPLACE_ARG = None
 # to specify the weight of the SPNE fitness compared to the number of nodes
 WEIGHTS = None
 
@@ -68,9 +73,6 @@ PLACEMENT_TYPE = None
 # the borders of the map, these borders + the stepsize compute the length in the
 # dimensions
 BORDERS = None
-# the stepsize, which is used between the borders and between the height for the
-# area and the cubic types
-STEPSIZE = None
 # specifies the length in x, y, z direction in a list
 LENG = 3 * [None] 
 # length of an individual, which is determined by the number of items in a list or by the
@@ -88,8 +90,6 @@ COVERAGE_MAX_LEVEL = None
 FILENAME = None
 # the stepsize, which is used in the RaLaNS file
 STEPSIZE = None
-# the file, which contains the actual result txt file in the zip file.
-RaLaNS_RESFILE = None
 
 #so every saved plot in 1 run has same time
 START_TIME = time.time()
@@ -117,12 +117,18 @@ def create_result_folder(type_name, placement_name):
 
     """
     global FOLDER
-    FOLDER = "../results/" + "ga_run" + "/"
+    FOLDER = "../results/" + DES + "/"
     FOLDER += type_name + "/"
     FOLDER += placement_name + "/"
     FOLDER += "LEN_" + str(IND_LEN) + "/"
-    FOLDER += "GEN_NUM_" + str(GEN_NUM) + "/"
-    FOLDER += "POP_SIZE_" + str(POP_SIZE) + "/"
+
+    if "GA" in DES:
+        FOLDER += "GEN_NUM_" + str(GEN_NUM) + "/"
+        FOLDER += "POP_SIZE_" + str(POP_SIZE) + "/"
+        FOLDER += "MUT_" + str(MUTATE) + "/"
+        FOLDER += "MATE_" + str(MATE) + "/"
+        FOLDER += "SEL_" + str(SELECT) + "/"
+        FOLDER += "REP_" + str(REPLACE) + "/"
     FOLDER += "time_" + START_TIME_STR + "/"
     if not os.path.exists(FOLDER):
         os.makedirs(FOLDER)
@@ -134,7 +140,6 @@ def read_header(headerfile):
     """reads the header, the first 2 lines, of the file, which specifies that.
 
     :headerfile: the path to the file
-    :returns: TODO
 
     """
 
@@ -158,7 +163,7 @@ def read_header(headerfile):
 
         # set the stepsize according to the PLACEMENT_TYPE
         if PLACEMENT_TYPE == AREA:
-            assert stepsizes[0] == stepsizes[1], "uneven stepsizes not supported"
+            assert stepsizes[0] == stepsizes[1], "unequal stepsizes not supported"
             STEPSIZE = stepsizes[0]
         elif PLACEMENT_TYPE == CUBIC:
             assert stepsizes[0] == stepsizes[1] == stepsizes[2]
@@ -203,16 +208,19 @@ def fill_config(configfile):
     config = configobj.ConfigObj(configfile, configspec=configspec, list_values=True)
     val = Validator()
     test_passed = config.validate(val)
-    if test_passed:
-            print('Succeeded.')
-    else:
+    if not test_passed:
         sys.exit(gen_error_message('Validation incorrect!!!', test_passed))
     
+    #read the description, relevant for the saving path
+    global DES
+    DES = config['DES']
+
     genetic_arg_options = ['MUTATE', 'SELECT', 'REPLACE', 'MATE', 'INIT', 
             'FITNESS']
     genetic_args = list(genetic_arg_options)
     genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
-        'MUTATE_PROB','INIT_ARG','HOF_NUM', 'WEIGHTS'])
+        'MUTATE_PROB','INIT_ARG','HOF_NUM', 'WEIGHTS', 'SELECT_ARG',
+        'REPLACE_ARG'])
 
     for argument_name in genetic_args:
         globals()[argument_name] = config['genetic_algorithm'][argument_name]
@@ -280,6 +288,10 @@ def fill_config(configfile):
     shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
     assert len(BORDERS) == 4
+
+    print('FILENAME: ', FILENAME)
+    print('LENG: ', LENG)
+    print('FOLDER: ', FOLDER)
 
 def gen_error_message(message, arg):
     """generates an error message for the invalid argument with its value and type

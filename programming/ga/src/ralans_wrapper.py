@@ -40,9 +40,7 @@ def init():
     signals array for better use later.
 
     """
-    print('FILENAME: ', config.FILENAME)
-    print('LENG: ', config.LENG)
-    print('COVERAGE_LEVEL: ', config.COVERAGE_LEVEL)
+
     resfile, _, _  = ralans_helper.getFiles(config.FILENAME)
     read_resultfile(resfile, True)
     resfile.close()

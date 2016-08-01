@@ -172,7 +172,6 @@ def parseHead(head, type):
     return borders, stp, height, leng
 
 def parseBorders(input):
-    print('input: ', input)
     input = conv_byte_to_str(input)
     return np.loadtxt(io.StringIO(input.strip()), delimiter=" ").tolist()
 
