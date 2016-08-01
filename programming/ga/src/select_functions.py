@@ -5,12 +5,17 @@ from operator import attrgetter
 def selRandom(individuals, k):
     """select k individuals randomly.
 
-    :individuals: TODO
-    :k: TODO
-    :returns: TODO
+    :individuals: the individuals to select from
+    :k: the number of individuals to select
+    :returns: a tuple of the select individuals and their indices in the given
+    individuals
 
     """
-    return random.sample(individuals, k)
+    individual_indices = list(range(len(individuals)))
+    chosen_indices = random.sample(individual_indices, k)
+    chosen = [ individuals[idx] for idx in chosen_indices ]
+
+    return chosen, chosen_indices
 
 def selTournament(individuals, k, tournsize):
     """Select *k* individuals from the input *individuals* using *k*

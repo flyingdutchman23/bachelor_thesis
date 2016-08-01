@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+# to measure the time
+import time
 #to randomize the initilization part
 import random
 #for easiert calculation
@@ -135,7 +137,7 @@ def init():
         toolbox.register("select", selects.selTournament,
                 tournsize=tournsize)
     elif config.SELECT == 1:
-        toolbox.register("select", selects.random)
+        toolbox.register("select", selects.selRandom)
     else:
         sys.exit('Wrong select function!')
 
@@ -231,7 +233,7 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
     hof_fit = None
 
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals']\
+    logbook.header = ['gen', 'nevals', 'time']\
             + (stats.fields if stats else [])\
             + (hof_stats.fields if hof_stats else [])
 
@@ -246,7 +248,7 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
     record = stats.compile(pop) if stats else {}
     hof_record = hof_stats.compile(halloffame) if hof_stats else {}
     record.update(hof_record)
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
+    logbook.record(gen=0, nevals=len(invalid_ind), time=time.time(), **record)
     if verbose:
         print(logbook.stream)
 
@@ -287,7 +289,8 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
         record = stats.compile(pop) if stats else {}
         hof_record = hof_stats.compile(halloffame) if hof_stats else {}
         record.update(hof_record)
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        logbook.record(gen=gen, nevals=len(invalid_ind), time=time.time(),
+                **record)
         if verbose:
             print(logbook.stream)        
 
