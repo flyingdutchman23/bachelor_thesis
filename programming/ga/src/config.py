@@ -125,9 +125,9 @@ def create_result_folder(type_name, placement_name):
     if "GA" in DES:
         FOLDER += "GEN_NUM_" + str(GEN_NUM) + "/"
         FOLDER += "POP_SIZE_" + str(POP_SIZE) + "/"
-        FOLDER += "MUT_" + str(MUTATE) + "/"
+        FOLDER += "MUT_" + str(MUTATE) + "_PROB_" + str(MUTATE_PROB) + "/"
         FOLDER += "MATE_" + str(MATE) + "/"
-        FOLDER += "SEL_" + str(SELECT) + "/"
+        FOLDER += "SEL_" + str(SELECT) + "_PROB_" + str(SELECT_PROB) + "/"
         FOLDER += "REP_" + str(REPLACE) + "/"
     FOLDER += "time_" + START_TIME_STR + "/"
     if not os.path.exists(FOLDER):
