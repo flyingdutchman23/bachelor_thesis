@@ -156,17 +156,28 @@ def graph_evaluate(individual):
     module.
 
     :individual: the individual, for which SPNE as its fitness should calculated
-
-    :returns: the numeric value of the SPNE metric as a float
+    :returns: a tuple of the numeric value of the SPNE metric as a float and the
+    number of nodes
 
     """
     nodes = np.nonzero(individual)[0]
+    return nodes_graph_evaluate(nodes, individual)
+
+def nodes_graph_evaluate(nodes, individual = None):
+    """computes the SPNE metric with the given node indices
+
+    :nodes: the node indices
+    :returns: a tuple of the numeric value of the SPNE metric as a float and the
+    number of nodes
+
+    """
     num_of_nodes = len(nodes)
     if num_of_nodes == 0:
-        return 0,
+        return 0, num_of_nodes
 
     rec_packs = graph_received_packets(individual,nodes)
-    spne = rec_packs / (num_of_nodes * config.LENG[1] * config.LENG[0])
+    assert config.IND_LEN == config.LENG[1] * config.LENG[0]
+    spne = rec_packs / (num_of_nodes * config.IND_LEN)
 
     #check boundaries of the SPNE metric
     assert spne <= 1
