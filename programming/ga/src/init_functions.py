@@ -117,6 +117,25 @@ def fixed_number_random(num_of_nodes):
 
     return ind
 
+def range_number_random(min_num_of_nodes, max_num_of_nodes):
+    """initializes an individual randomly with a certain number of nodes. This
+    number is between the min and max boundaries given.
+
+    :min_num_of_nodes: the min number of nodes the individual may have
+    :max_num_of_nodes: the max number of nodes the individual may have
+
+    :returns: the individual
+
+    """
+
+    assert min_num_of_nodes > 0
+    assert max_num_of_nodes > 0
+
+    nums_of_nodes = list(range(min_num_of_nodes, max_num_of_nodes+1))
+    num_of_nodes = random.choice(nums_of_nodes)
+
+    return fixed_number_random(num_of_nodes)
+
 def flexible_random(probability):
     """initializes an individual randomly with a given probability to place a node on each
     position
