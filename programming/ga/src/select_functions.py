@@ -32,7 +32,7 @@ def selTournament(individuals, k, tournsize):
     chosen_indices = []
     individual_indices = list(range(len(individuals)))
     for i in range(k):
-        aspirant_indices = selRandom(individual_indices, tournsize)
+        aspirant_indices = random.sample(individual_indices, tournsize)
         aspirants = [individuals[j] for j in aspirant_indices]
         max_index = aspirants.index(max(aspirants, key=attrgetter("fitness")))
         chosen.append(aspirants[max_index])

@@ -173,7 +173,7 @@ def run(doSave=True, show=True):
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
     if doSave:
-        save(hof, logbook, pop, show)
+        save(hof, logbook, pop, show=show)
 
 def save(hof, logbook, pop, his=None, show=True, save_his=False):
     """does a lot of stuff after the ga to store data, plot data and the
@@ -190,21 +190,24 @@ def save(hof, logbook, pop, his=None, show=True, save_his=False):
             config.POSITIONS)
     my_util.save_ind(config.FOLDER+"best_ind.ser", hof[0])
     my_util.save_ind_txt(config.FOLDER+"best_ind.txt", hof[0])
+    my_util.save_logbook(config.FOLDER+"logbook.ser", logbook)
 
     # my_util.save_dict(config.FOLDER+"history_individuals.ser",
             # his.genealogy_history)
     # my_util.save_dict(config.FOLDER+"history_tree.ser",
             # his.genealogy_tree)
 
-    my_util.save_logbook(config.FOLDER+"logbook.ser", logbook)
-    plot_helper.avg_min_max(logbook, col=0, name='spne_stats')
-    plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats')
-    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end")
+    plot_helper.avg_min_max(logbook, col=0, name='spne_stats', to_show=show)
+    plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats',
+            to_show=show)
+    plot_helper.scatter_map_dist(hof[0],"best_individual_after_end",
+            to_show=show)
     plot_helper.draw_individual_graph(hof[0],"best_individual_graph")
 
-    if config.PLACEMENT_TYPE == config.AREA and False:
-        plot_helper.map(hof[0],"best_individual_after_end")
-        plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end")
+    if config.PLACEMENT_TYPE == config.AREA and show:
+        plot_helper.map(hof[0],"best_individual_after_end", to_show=show)
+        plot_helper.graph_nodes_with_range(hof[0],"best_individual_after_end",
+                to_show=show)
 
     # if save_his and not his == None:
         # his.update(pop)
