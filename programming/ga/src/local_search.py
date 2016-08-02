@@ -116,6 +116,11 @@ def run(doSave=True, show=True):
 
     nodes, fit, logbook = local_search(pop, toolbox, stats=stats)
     toolbox.register("init", inits.multiple_nodes, nodes)
+    toolbox.register("individual", tools.initIterate, creator.Individual,
+            toolbox.init)
+    #how to init hole population -> in list
+    toolbox.register("population", tools.initRepeat, list,
+            toolbox.individual)
     pop = toolbox.population(n=1)
     print("pop: ")
     print(pop)
