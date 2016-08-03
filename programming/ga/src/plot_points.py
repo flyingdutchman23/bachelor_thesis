@@ -7,9 +7,8 @@ import init_functions as init
 
 def main():
 
-    configfile = "/home/joris/workspace/bachelor_thesis/programming/ga/configfiles/ga_new.cfg"
+    configfile = "/home/joris/workspace/bachelor_thesis/programming/ga/configfiles/ga_plot.cfg"
     config.fill_config(configfile)
-    print("after fill config")
 
     ralans.init()
     individual = init.ones()
