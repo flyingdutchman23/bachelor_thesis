@@ -88,12 +88,10 @@ def init():
 
     # Choose init function
     if config.INIT == 0:
-        min_num_of_nodes = int(config.INIT_ARG[0])
-        max_num_of_nodes = int(config.INIT_ARG[1])
-        assert min_num_of_nodes > 0
-        assert max_num_of_nodes > 0
-        toolbox.register("init", inits.range_number_random, min_num_of_nodes,
-                max_num_of_nodes)
+        num_of_nodes = int(config.INIT_ARG[0])
+        print('num_of_nodes: ', num_of_nodes)
+        assert num_of_nodes > 0
+        toolbox.register("init", inits.fixed_number_random, num_of_nodes)
         #registers function to init individual
         toolbox.register("individual", tools.initIterate, creator.Individual,
                 toolbox.init)
@@ -183,6 +181,22 @@ def random_search(pop, toolbox, stats=None,
         print("evaluations: ", evaluations)
 
         halloffame.update(new_inds)
+        new_num = int(halloffame[0].fitness.values[1])
+        spne = halloffame[0].fitness.values[0]
+        assert spne <= 1
+        assert new_num > 1
+
+        if spne >= 1:
+            # in the fixed version it should not be able to go here, if the
+            # number of nodes is small enough that it does not cover the hole
+            # area
+            toolbox.register("init", inits.fixed_number_random, new_num-1)
+            #registers function to init individual
+            toolbox.register("individual", tools.initIterate,
+                    creator.Individual, toolbox.init)
+            #how to init hole population -> in list
+            toolbox.register("population", tools.initRepeat, list,
+                    toolbox.individual)
 
         # Append the current generation statistics to the logbook
         for new_ind in new_inds:
