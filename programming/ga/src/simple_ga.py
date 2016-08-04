@@ -145,9 +145,9 @@ def init():
         tournsize = int(config.SELECT_ARG[0])
         toolbox.register("replace", replaces.repTournament,
                 tournsize=tournsize)
-    elif config.SELECT == 1:
+    elif config.REPLACE == 1:
         toolbox.register("replace", replaces.repParents)
-    elif config.SELECT == 2:
+    elif config.REPLACE == 2:
         toolbox.register("replace", replaces.repRandom)
     else:
         sys.exit('Wrong select function!')
@@ -285,6 +285,10 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
         
         # Update the hall of fame with the generated individuals
         halloffame.update(invalid_ind)
+
+        # to make sure that the offspr is valid
+        test_invalid_ind = [ind for ind in offspr if not ind.fitness.valid]
+        assert len(test_invalid_ind) == 0
 
         pop[:] = toolbox.replace(pop, invalid_ind, offspr)
 
