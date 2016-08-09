@@ -105,10 +105,20 @@ def init():
         #how to init hole population -> in list
         toolbox.register("population", tools.initRepeat, list,
                 toolbox.individual)
-
     elif config.INIT in [3,4]:
         toolbox.register("population", inits.best_samples, config.INIT_ARG,
                 init=config.INIT)
+    elif config.INIT == 5:
+        nodes = list(config.INIT_ARG)
+        assert len(nodes) > 0
+        nodes = [ int(node) for node in nodes ]
+        toolbox.register("init", inits.multiple_nodes, nodes)
+        #registers function to init individual
+        toolbox.register("individual", tools.initIterate, creator.Individual,
+                toolbox.init)
+        #how to init hole population -> in list
+        toolbox.register("population", tools.initRepeat, list,
+                toolbox.individual)
     else:
         sys.exit('Wrong init function!')
 
