@@ -162,7 +162,7 @@ def load_logbook(filepath):
 
     input_log = open(filepath,'rb')
     logbook = pickle.load(input_log)
-    return log
+    return logbook
 
 def save_dict(filepath, dictionary):
     """save a dictionary object to a file for persistence.
