@@ -48,6 +48,127 @@ def draw_individual_graph(individual,name):
     gt.graph_draw(g, positions, vertex_text=g.vertex_index, vertex_font_size=12, 
             output=config.FOLDER+name, output_size=output_size)
 
+def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0, 
+        name = "Statistics", title="No_Titel"):
+
+    colors = ['b', 'g', 'r', 'y', 'c', 'm']
+    assert col in [0,1]
+    assert len(logbooks) == len(selects) == len(descs)
+
+    data = [None] * len(logbooks)
+
+    gen = np.array(logbooks[0].select("gen"))
+    for i in range(len(logbooks)):
+        gen_new = np.array(logbooks[i].select("gen"))
+        assert set(gen) == set(gen_new)
+        data[i] = np.array(logbooks[i].select(selects[i]))[:,col]
+
+    fig, ax1 = plt.subplots()
+
+    lines = [None] * len(logbooks)
+    for i in range(len(logbooks)):
+        lines[i] = ax1.plot(gen, data[i], colors[i], label=descs[i])
+
+    ax1.set_xlabel("Generationen")
+    ax1.set_ylabel("Fitness")
+
+    # not sure what's that for
+    # for tl in ax1.get_yticklabels():
+        # tl.set_color("b")
+
+    lns = []
+    for l in lines:
+        lns += l
+
+    labs = [l.get_label() for l in lns]
+    # ax1.legend(lns, labs, loc="best", title=title)
+    # ax1.legend(lns, labs, title=title, bbox_to_anchor=(1.05, 1), loc='best', 
+            # borderaxespad=0.)
+    ax1.legend(lns, labs, title=title, bbox_to_anchor=(0., 1.02, 1., .102),
+            loc=3, ncol=3, mode="expand", borderaxespad=0.)
+    fig.subplots_adjust(top=0.83, bottom=0.09, left=0.05, right=0.95)
+
+    #save the plot
+    fig.savefig(save_folder+name)
+    if to_show:
+        plt.show()
+
+def bar_plot(logbooks, selects, descs, save_folder, to_show=True, col=0, 
+        name = "Statistics", title="No_Titel", max_evals=100000):
+
+    assert col in [0,1]
+    assert len(logbooks) == len(selects) == len(descs)
+    N = len(logbooks)
+    
+    data = [None] * N
+    evals_data = [None] * N
+    tot_evals = []
+
+    gen = np.array(logbooks[0].select("gen"))
+    for i in range(len(logbooks)):
+        gen_new = np.array(logbooks[i].select("gen"))
+        assert set(gen) == set(gen_new)
+        evals_data[i] = np.array(logbooks[i].select('nevals'))
+        tot_evals.append(np.sum(evals_data[i]))
+        data[i] = np.array(logbooks[i].select(selects[i]))[:,col]
+
+    print(tot_evals)
+    min_evals = min(tot_evals)
+    if min_evals > max_evals:
+        min_evals = max_evals
+    print(min_evals)
+
+    for i in range(len(logbooks)):
+        evals = 0
+        j = 0
+        while evals <= min_evals and j < len(evals_data[i]):  
+            evals += evals_data[i][j]
+            j += 1
+        assert j != len(evals_data[i]) or evals == min_evals
+        print('j: ', j)
+        print('evals: ', evals-evals_data[i][j%len(evals_data[i])])
+        data[i] = data[i][:j]
+            
+
+    # just take the last value of the logbooks
+    values = [None] * N
+    for i in range(N):
+        values[i] = data[i][-1]
+    print(values)
+
+    width = 0.25       # the width of the bars
+    ind = np.arange(N)  # the x locations for the groups
+    ind = ind + width/2
+
+    
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(ind, values, width, color='r')
+    
+    # add some text for labels, title and axes ticks
+    ax.set_ylabel('Fitness')
+    ax.set_xlabel(title)
+    # ax.set_title('Scores by group and gender')
+    ax.set_xticks(ind + width/2)
+    ax.set_xticklabels(descs)
+    
+    
+    autolabel(rects1, ax)
+    
+    fig.subplots_adjust(top=0.92, bottom=0.12, left=0.05, right=0.95)
+
+    #save the plot
+    fig.savefig(save_folder+name)
+    if to_show:
+        plt.show()
+
+def autolabel(rects, ax):
+    # attach some text labels
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
+                '%.2f' % float(height),
+                ha='center', va='bottom')
+
 def avg_min_max(logbook,save=True,to_show=True, col=0, name = "Statistics"):
 
     assert col in [0,1]
