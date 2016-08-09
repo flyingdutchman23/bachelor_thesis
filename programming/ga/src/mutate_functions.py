@@ -44,3 +44,16 @@ def lochert_mutate_flexible(individual, indp):
     """
     #TODO implement the function
     pass
+
+def mutFlipBitOne(ind):
+    """mutates an individual by exactly 1 Flip of 1 Bit at a random position.
+
+    :ind: the given individual
+    :returns: the modified, mutated individual
+
+    """
+
+    idx = random.choice(range(len(ind)))
+    ind[idx] = not ind[idx]
+
+    return ind,
