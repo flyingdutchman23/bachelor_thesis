@@ -48,6 +48,8 @@ SELECT_ARG = None
 SELECT_PROB = None
 # to specify which reproduction function should be used
 MATE = None
+# to specify to probability for and individual to be mated
+MATE_PROB = None
 # to specify which init function should be used
 INIT = None
 # the argument of the init function, if one is needed for the chosen init function
@@ -126,7 +128,7 @@ def create_result_folder(type_name, placement_name):
         FOLDER += "GEN_NUM_" + str(GEN_NUM) + "/"
         FOLDER += "POP_SIZE_" + str(POP_SIZE) + "/"
         FOLDER += "MUT_" + str(MUTATE) + "_PROB_" + str(MUTATE_PROB) + "/"
-        FOLDER += "MATE_" + str(MATE) + "/"
+        FOLDER += "MATE_" + str(MATE) + "_PROB_" + str(MATE_PROB) + "/"
         FOLDER += "SEL_" + str(SELECT) + "_PROB_" + str(SELECT_PROB) + "/"
         FOLDER += "REP_" + str(REPLACE) + "/"
     FOLDER += "time_" + START_TIME_STR + "/"
@@ -220,7 +222,7 @@ def fill_config(configfile):
     genetic_args = list(genetic_arg_options)
     genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
         'MUTATE_PROB','INIT_ARG','HOF_NUM', 'WEIGHTS', 'SELECT_ARG',
-        'REPLACE_ARG'])
+        'REPLACE_ARG', 'MATE_PROB'])
 
     for argument_name in genetic_args:
         globals()[argument_name] = config['genetic_algorithm'][argument_name]

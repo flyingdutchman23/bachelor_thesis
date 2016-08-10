@@ -24,15 +24,8 @@ def repParents(pop, offspr, new_pop):
     return new_pop
 
 def repTournament(pop, offspr, new_pop, tournsize):
-    """Select *k* individuals from the input *individuals* using *k*
-    tournaments of *tournsize* individuals. The list returned contains
-    references to the input *individuals*.
-    
-    :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select.
-    :param tournsize: The number of individuals participating in each tournament.
-    :returns: A list of selected individuals.
-    
+    """ replaces the individuals of the pop using the reverse Tournament
+    Selection
     """
     pop_indices = list(range(len(pop)))
     for child in offspr:

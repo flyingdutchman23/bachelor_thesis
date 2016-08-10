@@ -180,7 +180,7 @@ def run(doSave=True, show=True):
     pool = multiprocessing.Pool()
     toolbox.register("map", pool.map)
 
-    pop, logbook = eaSimple(pop, toolbox, cxpb=config.SELECT_PROB,
+    pop, logbook = eaSimple(pop, toolbox, cxpb=config.MATE_PROB,
             mutpb=config.MUTATE_PROB, 
             ngen=config.GEN_NUM, stats=stats, halloffame=hof)
 
@@ -273,21 +273,29 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
         # Select the next generation individuals
         # round it to an even number, because uneven is unnecessary for
         # crossover
-        offspr_size = int(len(pop) * cxpb) & (-2)
-        _, offspr_idxs = toolbox.select(pop, offspr_size)
+        _, offspr_idxs = toolbox.select(pop, config.SELECT_PROB)
+        offspr_size = len(offspr_idxs)
+        print('offspr_size: ', offspr_size)
         offspr = [toolbox.clone(ind) for ind in pop]
 
         # Apply crossover and mutation on the offspring
-        for i in range(0,len(offspr_idxs),2):
-            offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]] = toolbox.mate(
-                    offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]])
-            del offspr[offspr_idxs[i-1]].fitness.values,\
-                    offspr[offspr_idxs[i]].fitness.values
+        count_cx = 0
+        for i in range(0,offspr_size,2):
+            if random.random() < cxpb:
+                count_cx += 1
+                offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]] = toolbox.mate(
+                        offspr[offspr_idxs[i-1]], offspr[offspr_idxs[i]])
+                del offspr[offspr_idxs[i-1]].fitness.values,\
+                        offspr[offspr_idxs[i]].fitness.values
+        print('count_cx: ', count_cx)
 
-        for i in range(len(offspr)):
+        count_mut = 0
+        for i in range(offspr_size):
             if random.random() < mutpb:
+                count_mut += 1
                 offspr[i], = toolbox.mutate(offspr[i])
                 del offspr[i].fitness.values
+        print('count_mut: ', count_mut)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspr if not ind.fitness.valid]
