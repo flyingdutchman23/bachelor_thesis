@@ -19,8 +19,8 @@ def selRandom(individuals, spb):
     for i in range(len(individuals)):
         if random.random() < spb:
             chosen_idx = random.choice(individual_indices)
-            chosen.appen(chosen_idx)
-            chosen_indices.remove(chosen_idx)
+            chosen_indices.append(chosen_idx)
+            individual_indices.remove(chosen_idx)
 
     chosen = [ individuals[idx] for idx in chosen_indices ]
 
