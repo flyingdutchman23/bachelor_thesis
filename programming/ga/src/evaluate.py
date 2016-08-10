@@ -32,22 +32,30 @@ def main():
     title = config['title']
     plot_type = config['type']
     max_evals = int(config['max_evals'])
+    comp_by_evals = int(config['comp_by_evals'])
     print(descs)
     assert len(descs) == len(var_folds)
     selects = [config['select']] * len(descs)
 
-    logbook_folds = []
+    logbooks_folds = []
     for i in range(len(var_folds)):
+        logbooks_folds.append([])
         fold = base_fold + var_folds[i] + aft_var_fold
         times = os.listdir(fold)
         assert len(times) >= 1
-        print('times 0: ', times[0])
-        fold += times[0]
-        logbook_folds.append(fold)
+        for time in times:
+            logbooks_folds[i].append(fold+time)
 
     logbooks = []
-    for fold in logbook_folds:
-        logbooks.append(my_util.load_logbook(fold+"/logbook.ser"))
+    logbookss = []
+    for i in range(len(logbooks_folds)):
+        logbookss.append([])
+        logbook_folds = logbooks_folds[i]
+        print(logbook_folds)
+        logbooks.append(my_util.load_logbook(logbook_folds[0]+"/logbook.ser"))
+        for fold in logbook_folds:
+            logbookss[i].append(my_util.load_logbook(fold+"/logbook.ser"))
+
         
 
     if plot_type == 'normal':
@@ -56,6 +64,10 @@ def main():
     elif plot_type == 'bar':
         plot_helper.bar_plot(logbooks, selects, descs, save_folder,
                 name=name, title=title, max_evals=max_evals)
+    elif plot_type == 'box':
+        plot_helper.box_plot(logbookss, selects, descs, save_folder,
+                name=name, title=title, max_evals=max_evals, 
+                comp_by_evals=comp_by_evals)
 
 if __name__ == "__main__":
     main()
