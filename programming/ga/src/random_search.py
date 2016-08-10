@@ -51,6 +51,11 @@ parser = argparse.ArgumentParser(
     description='Start the local search with the given config file.')
 parser.add_argument('configfile', metavar='C', type=str,
                             help='the path to the config file')
+parser.add_argument('--show', dest='show', action='store_true',
+                            help='shows the result at end')
+parser.add_argument('--no-show', dest='show', action='store_false',
+                            help='does not show the result at end')
+parser.set_defaults(show=True)
 
 toolbox = base.Toolbox()
 
@@ -115,7 +120,7 @@ def run(doSave=True, show=True):
     if doSave:
         save(hof, logbook, show)
 
-def save(pop, logbook, show=True):
+def save(pop, logbook, show=False):
     """does a lot of stuff after the ga to store data, plot data and the
     Statistics.
 
@@ -132,9 +137,11 @@ def save(pop, logbook, show=True):
     my_util.save_ind_txt(config.FOLDER+"best_ind.txt", pop[0])
 
     my_util.save_logbook(config.FOLDER+"logbook.ser", logbook)
-    plot_helper.avg_min_max(logbook, col=0, name='spne_stats')
-    plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats')
-    plot_helper.scatter_map_dist(pop[0],"best_individual_after_end")
+    plot_helper.avg_min_max(logbook, col=0, name='spne_stats', to_show=show)
+    plot_helper.avg_min_max(logbook, col=1, name='number_of_nodes_stats',
+            to_show=show)
+    plot_helper.scatter_map_dist(pop[0],"best_individual_after_end",
+            to_show=show)
     plot_helper.draw_individual_graph(pop[0],"best_individual_graph")
 
 
@@ -218,7 +225,7 @@ def main():
     init()
     print("after init!!!")
     print()
-    run()
+    run(show=args.show)
 
     
 if __name__ == "__main__":
