@@ -16,6 +16,8 @@ import configobj
 from validate import Validator
 # to do multiplication
 import numpy as np
+# to calc borders
+import my_util
 
 import io
 
@@ -33,6 +35,8 @@ DES = None
 POP_SIZE = None
 #Number of Generations to run the algorithm
 GEN_NUM = None
+#Number of Generations after stop when best solution does not improve
+UNCHANGED_GEN_NUM = None
 # to specify which mutation function should be used
 MUTATE = None
 # to specify to probability for and individual to be mutated
@@ -193,6 +197,10 @@ def read_header(headerfile):
         LENG[XAXIS] = len(POSITIONS)
         LENG[YAXIS] = 1
         LENG[ZAXIS] = 1
+        if TYPE == PROTOTYPE:
+            data_borders = my_util.calc_borders(POSITIONS)
+            data_borders = my_util.remove_border_axis(data_borders)
+            BORDERS = data_borders
 
     headerfile.close()
 
@@ -220,9 +228,9 @@ def fill_config(configfile):
     genetic_arg_options = ['MUTATE', 'SELECT', 'REPLACE', 'MATE', 'INIT', 
             'FITNESS']
     genetic_args = list(genetic_arg_options)
-    genetic_args.extend(['POP_SIZE','GEN_NUM','MUTATE_IND_PROB','SELECT_PROB',
-        'MUTATE_PROB','INIT_ARG','HOF_NUM', 'WEIGHTS', 'SELECT_ARG',
-        'REPLACE_ARG', 'MATE_PROB'])
+    genetic_args.extend(['POP_SIZE','GEN_NUM', 'UNCHANGED_GEN_NUM', 
+        'MUTATE_IND_PROB','SELECT_PROB', 'MUTATE_PROB','INIT_ARG','HOF_NUM',
+        'WEIGHTS', 'SELECT_ARG', 'REPLACE_ARG', 'MATE_PROB'])
 
     for argument_name in genetic_args:
         globals()[argument_name] = config['genetic_algorithm'][argument_name]
@@ -289,6 +297,7 @@ def fill_config(configfile):
     # save a copy of the configfile in the result folder as well
     shutil.copyfile(configfile, FOLDER+'genetic_algorithm.cfg')
 
+    print(BORDERS)
     assert len(BORDERS) == 4
 
     print('FILENAME: ', FILENAME)

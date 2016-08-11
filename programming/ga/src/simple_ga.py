@@ -274,7 +274,11 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
         print(logbook.stream)
 
     # Begin the generational process
-    for gen in range(1, ngen+1):
+    gen = 1
+    unchanged_gens = 0
+    # additional for sense making config
+    assert ngen >= config.UNCHANGED_GEN_NUM
+    while gen <= ngen and unchanged_gens <= config.UNCHANGED_GEN_NUM:
 
         # Select the next generation individuals
         # round it to an even number, because uneven is unnecessary for
@@ -310,7 +314,14 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
             ind.fitness.values = fit
         
         # Update the hall of fame with the generated individuals
+        best_fit = halloffame[0].fitness.values
         halloffame.update(invalid_ind)
+        if best_fit == halloffame[0].fitness.values:
+            unchanged_gens += 1
+            print('unchanged best :(')
+        else:
+            unchanged_gens = 0
+            print('changed best :)')
 
         # to make sure that the offspr is valid
         test_invalid_ind = [ind for ind in offspr if not ind.fitness.valid]
@@ -326,5 +337,7 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
                 **record)
         if verbose:
             print(logbook.stream)        
+
+        gen += 1
 
     return pop, logbook
