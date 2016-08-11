@@ -43,7 +43,8 @@ def selTournament(individuals, spb, tournsize):
 
     for i in range(len(individuals)):
         if random.random() < spb:
-            aspirant_indices = random.sample(individual_indices, tournsize)
+            aspirant_indices = random.sample(individual_indices, min(tournsize,
+                len(individual_indices)))
             aspirants = [individuals[j] for j in aspirant_indices]
             max_index = aspirants.index(max(aspirants, 
                 key=attrgetter("fitness")))
