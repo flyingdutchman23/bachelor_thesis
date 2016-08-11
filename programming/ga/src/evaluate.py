@@ -33,6 +33,7 @@ def main():
     plot_type = config['type']
     max_evals = int(config['max_evals'])
     comp_by_evals = int(config['comp_by_evals'])
+    col = int(config['col'])
     print(descs)
     assert len(descs) == len(var_folds)
     selects = [config['select']] * len(descs)
@@ -67,7 +68,7 @@ def main():
     elif plot_type == 'box':
         plot_helper.box_plot(logbookss, selects, descs, save_folder,
                 name=name, title=title, max_evals=max_evals, 
-                comp_by_evals=comp_by_evals)
+                comp_by_evals=comp_by_evals, col=col)
 
 if __name__ == "__main__":
     main()
