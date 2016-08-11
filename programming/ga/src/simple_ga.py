@@ -141,6 +141,12 @@ def init():
         toolbox.register("mutate", mutates.lochert_mutate_one)
     elif config.MUTATE == 3:
         toolbox.register("mutate", mutates.mutFlipBitOne)
+    elif config.MUTATE == 4:
+        toolbox.register("mutate", tools.mutFlipBit,
+                indpb=float(2 / config.IND_LEN))
+    elif config.MUTATE == 5:
+        toolbox.register("mutate", tools.mutFlipBit,
+                indpb=float(4 / config.IND_LEN))
     else:
         sys.exit('Wrong mutate function!')
 
