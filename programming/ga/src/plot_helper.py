@@ -188,6 +188,7 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
     print(tot_evals)
 
     if comp_by_evals:
+        print("equalize!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         min_evals = min(tot_evals)
         if min_evals > max_evals:
             min_evals = max_evals
@@ -198,13 +199,16 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
             for i in range(len(logbooks)):
                 evals = 0
                 j = 0
-                while evals <= min_evals and j < len(evals_data[i]):  
-                    evals += evals_data[i][j]
+                while evals <= min_evals and j < len(evals_data[k][i]):  
+                    # print("in loop begin")
+                    evals += evals_data[k][i][j]
                     j += 1
-                assert j != len(evals_data[i]) or evals == min_evals
-                print('j: ', j)
-                print('evals: ', evals-evals_data[i][j%len(evals_data[i])])
-                data[i] = data[i][:j]
+                    # print(evals_data[i][j])
+                    # print("in loop end")
+                assert j != len(evals_data[k][i]) or evals == min_evals
+                # print('j: ', j)
+                # print('evals: ', evals-evals_data[k][i][j%len(evals_data[k][i])])
+                data[k][i] = data[k][i][:j]
             
 
     # just take the last value of the logbooks
@@ -212,6 +216,8 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
     for i in range(N):
         values[i] = []
         for j in range(len(logbookss[i])):
+            end = len(data[i][j])
+            print('evals: ', sum(evals_data[i][j][:end]))
             values[i].append(data[i][j][-1])
     print(values)
 
