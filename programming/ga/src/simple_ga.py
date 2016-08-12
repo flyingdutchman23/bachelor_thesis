@@ -318,7 +318,7 @@ def eaSimple(pop, toolbox, cxpb, mutpb, ngen, stats=None,
         halloffame.update(invalid_ind)
         if best_fit == halloffame[0].fitness.values:
             unchanged_gens += 1
-            print('unchanged best :(')
+            print('unchanged best :(: ', unchanged_gens)
         else:
             unchanged_gens = 0
             print('changed best :)')
