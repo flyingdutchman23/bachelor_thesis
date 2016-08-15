@@ -245,7 +245,7 @@ def local_search(pop, toolbox, stats=None,
 
         # Append the current generation statistics to the logbook
         record = stats.compile(fitnesses) if stats else {}
-        hof_record = hof_stats.compile([fitnesses[max_idx]]) if hof_stats\
+        hof_record = hof_stats.compile([(current_fit, len(nodes))]) if hof_stats\
                 else {}
         record.update(hof_record)
         logbook.record(gen=gen, nevals=len(fitnesses), time=time.time(),
