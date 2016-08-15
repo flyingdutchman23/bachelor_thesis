@@ -136,7 +136,7 @@ def save_ind(filepath, ind):
     output.close()
 
 def load_ind(filepath, weights=(1.0,)):
-    """save an individual to a txt file
+    """load an individual from a txt file
 
     """
     input_ind = open(filepath, "rb")
