@@ -30,9 +30,12 @@ def main():
     base_fold = config['base_fold']
     aft_var_fold = config['aft_var_fold']
     title = config['title']
+    yaxis = config['yaxis']
+    xaxis = config['xaxis']
     plot_type = config['type']
     max_evals = int(config['max_evals'])
     comp_by_evals = int(config['comp_by_evals'])
+    comp_by_gens = int(config['comp_by_gens'])
     col = int(config['col'])
     print(descs)
     assert len(descs) == len(var_folds)
@@ -62,13 +65,24 @@ def main():
     if plot_type == 'normal':
         plot_helper.combine_plots(logbooks, selects, descs, save_folder,
                 name=name, title=title)
+    elif plot_type == 'norm_one_fold':
+        assert len(logbookss) == 1
+        logbooks = logbookss[0]
+        assert len(logbooks) > 1
+        assert len(selects) == 1
+        assert len(descs) == 1
+        selects = selects * len(logbooks)
+        descs = descs * len(logbooks)
+        plot_helper.combine_plots(logbooks, selects, descs, save_folder,
+                name=name, title=title, yaxis=yaxis, xaxis=xaxis)
     elif plot_type == 'bar':
         plot_helper.bar_plot(logbooks, selects, descs, save_folder,
                 name=name, title=title, max_evals=max_evals)
     elif plot_type == 'box':
         plot_helper.box_plot(logbookss, selects, descs, save_folder,
                 name=name, title=title, max_evals=max_evals, 
-                comp_by_evals=comp_by_evals, col=col)
+                comp_by_evals=comp_by_evals, col=col, yaxis=yaxis,
+                comp_by_gens=comp_by_gens, xaxis=xaxis)
 
 if __name__ == "__main__":
     main()

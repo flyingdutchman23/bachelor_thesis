@@ -49,10 +49,14 @@ def draw_individual_graph(individual,name):
             output=config.FOLDER+name, output_size=output_size)
 
 def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0, 
-        name = "Statistics", title="No_Titel"):
+        name = "Statistics", title="No_Titel", yaxis='SPNE', 
+        xaxis='Generation'):
 
-    colors = ['b', 'g', 'r', 'y', 'c', 'm']
+    colors = ['b', 'g', 'r', 'y', 'c', 'm', 'orange', 'brown']
     assert col in [0,1]
+    print('len logbooks: ', len(logbooks))
+    print('len selects: ', len(selects))
+    print('len descs: ', len(descs))
     assert len(logbooks) == len(selects) == len(descs)
 
     data = [None] * len(logbooks)
@@ -60,17 +64,22 @@ def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0,
     gen = np.array(logbooks[0].select("gen"))
     for i in range(len(logbooks)):
         gen_new = np.array(logbooks[i].select("gen"))
-        assert set(gen) == set(gen_new)
+        assert set(gen) <= set(gen_new)
         data[i] = np.array(logbooks[i].select(selects[i]))[:,col]
+        if len(gen_new) > len(gen):
+            data[i] = data[i][:len(gen)]
 
     fig, ax1 = plt.subplots()
 
     lines = [None] * len(logbooks)
+    # data[0] = np.insert(data[0], 0, 0)
+    # gen = [0] + gen[:]
+    # gen = np.append(gen, gen[-1] + 1)
     for i in range(len(logbooks)):
         lines[i] = ax1.plot(gen, data[i], colors[i], label=descs[i])
 
-    ax1.set_xlabel("Generationen")
-    ax1.set_ylabel("Fitness")
+    ax1.set_xlabel(xaxis)
+    ax1.set_ylabel(yaxis)
 
     # not sure what's that for
     # for tl in ax1.get_yticklabels():
@@ -84,12 +93,12 @@ def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0,
     # ax1.legend(lns, labs, loc="best", title=title)
     # ax1.legend(lns, labs, title=title, bbox_to_anchor=(1.05, 1), loc='best', 
             # borderaxespad=0.)
-    ax1.legend(lns, labs, title=title, bbox_to_anchor=(0., 1.02, 1., .102),
-            loc=3, ncol=3, mode="expand", borderaxespad=0.)
-    fig.subplots_adjust(top=0.83, bottom=0.09, left=0.05, right=0.95)
+    # ax1.legend(lns, labs, title=title, bbox_to_anchor=(0., 1.02, 1., .102),
+            # loc=3, ncol=3, mode="expand", borderaxespad=0.)
+    fig.subplots_adjust(top=0.83, bottom=0.09, left=0.08, right=0.95)
 
     #save the plot
-    fig.savefig(save_folder+name)
+    fig.savefig(save_folder+name + '.eps')
     if to_show:
         plt.show()
 
@@ -157,13 +166,14 @@ def bar_plot(logbooks, selects, descs, save_folder, to_show=True, col=0,
     fig.subplots_adjust(top=0.92, bottom=0.12, left=0.05, right=0.95)
 
     #save the plot
-    fig.savefig(save_folder+name)
+    fig.savefig(save_folder + name + '.eps')
     if to_show:
         plt.show()
 
 def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0, 
         name = "Statistics", title="No_Titel", max_evals=100000,
-        comp_by_evals=True):
+        comp_by_evals=True, yaxis='SPNE', comp_by_gens=False, 
+        xaxis='Generation'):
 
     assert col in [0,1]
     assert len(logbookss) == len(selects) == len(descs)
@@ -172,18 +182,33 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
     data = [None] * N
     evals_data = [None] * N
     tot_evals = []
+    min_gens = []
 
-    gen = np.array(logbookss[0][0].select("gen"))
     for i in range(len(logbookss)):
+
         data[i] = []
         evals_data[i] = []
         logbooks = logbookss[i]
+        gen = np.array(logbookss[i][0].select("gen"))
+
         for j in range(len(logbooks)):
             gen_new = np.array(logbooks[j].select("gen"))
-            assert set(gen) == set(gen_new)
-            evals_data[i].append(np.array(logbooks[j].select('nevals')))
+            if len(gen_new) < len(gen):
+                gen = gen_new
+        min_gens.append(gen)
+
+        for j in range(len(logbooks)):
+            gen_new = np.array(logbooks[j].select("gen"))
+            assert set(gen) <= set(gen_new)
+            # assert set(gen) == set(gen_new)
+            cur_evals_data = np.array(logbooks[j].select('nevals'))
+            cur_data = np.array(logbooks[j].select(selects[i]))[:,col]
+            if len(gen_new) > len(gen) and comp_by_gens:
+                cur_evals_data = cur_evals_data[:len(gen)]
+                cur_data = cur_data[:len(gen)]
+            evals_data[i].append(cur_evals_data)
             tot_evals.append(np.sum(evals_data[i][j]))
-            data[i].append(np.array(logbooks[j].select(selects[i]))[:,col])
+            data[i].append(cur_data)
 
     print(tot_evals)
 
@@ -205,7 +230,7 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
                     j += 1
                     # print(evals_data[i][j])
                     # print("in loop end")
-                assert j != len(evals_data[k][i]) or evals == min_evals
+                # assert j != len(evals_data[k][i]) or evals == min_evals
                 # print('j: ', j)
                 # print('evals: ', evals-evals_data[k][i][j%len(evals_data[k][i])])
                 data[k][i] = data[k][i][:j]
@@ -228,22 +253,22 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
     
     fig, ax = plt.subplots()
     ax.boxplot(values, labels=descs, showmeans=True)
-    ax.set_title(title)
+    # ax.set_title(title)
     # rects1 = ax.bar(ind, values, width, color='r')
     
     # add some text for labels, title and axes ticks
-    ax.set_ylabel('Fitness')
-    ax.set_xlabel(title)
+    ax.set_ylabel(yaxis)
+    ax.set_xlabel(xaxis)
     # ax.set_xticks(ind + width/2)
     # ax.set_xticklabels(descs)
     
     
     # autolabel(rects1, ax)
     
-    fig.subplots_adjust(top=0.92, bottom=0.12, left=0.05, right=0.95)
+    fig.subplots_adjust(top=0.92, bottom=0.12, left=0.09, right=0.95)
 
     #save the plot
-    fig.savefig(save_folder+name)
+    fig.savefig(save_folder+name + '.eps')
     if to_show:
         plt.show()
 
