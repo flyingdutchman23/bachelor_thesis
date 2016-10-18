@@ -64,7 +64,7 @@ def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0,
     gen = np.array(logbooks[0].select("gen"))
     for i in range(len(logbooks)):
         gen_new = np.array(logbooks[i].select("gen"))
-        assert set(gen) <= set(gen_new)
+        # assert set(gen) <= set(gen_new)
         data[i] = np.array(logbooks[i].select(selects[i]))[:,col]
         if len(gen_new) > len(gen):
             data[i] = data[i][:len(gen)]
@@ -80,6 +80,7 @@ def combine_plots(logbooks, selects, descs, save_folder, to_show=True, col=0,
 
     ax1.set_xlabel(xaxis)
     ax1.set_ylabel(yaxis)
+    ax1.set_ylim([0,1])
 
     # not sure what's that for
     # for tl in ax1.get_yticklabels():
@@ -190,6 +191,7 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
         evals_data[i] = []
         logbooks = logbookss[i]
         gen = np.array(logbookss[i][0].select("gen"))
+        tot_evals_one = []
 
         for j in range(len(logbooks)):
             gen_new = np.array(logbooks[j].select("gen"))
@@ -207,10 +209,14 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
                 cur_evals_data = cur_evals_data[:len(gen)]
                 cur_data = cur_data[:len(gen)]
             evals_data[i].append(cur_evals_data)
-            tot_evals.append(np.sum(evals_data[i][j]))
+            tot_evals_one.append(np.sum(evals_data[i][j]))
             data[i].append(cur_data)
 
+        tot_evals.append(np.mean(tot_evals_one))
+
+    print("total evals:")
     print(tot_evals)
+    # tot_evals[-1] = 19650
 
     if comp_by_evals:
         print("equalize!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -253,6 +259,9 @@ def box_plot(logbookss, selects, descs, save_folder, to_show=True, col=0,
     
     fig, ax = plt.subplots()
     ax.boxplot(values, labels=descs, showmeans=True)
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(ind, tot_evals, width, color='r')
     # ax.set_title(title)
     # rects1 = ax.bar(ind, values, width, color='r')
     
