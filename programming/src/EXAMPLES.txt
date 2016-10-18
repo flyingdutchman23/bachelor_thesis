@@ -26,7 +26,7 @@ to run the local search with a fixed number of nodes:
 python3 local_search.py ../configfiles/lsrf.cfg
 
 to run the greedy algorithm:
-python3 local_search_flexible.py ../configfiles/lsrflex_LIST.cfg
+python3 local_search_flexible.py ../configfiles/lsrflex.cfg
 
 to run the random search algorithm with a fixed number of nodes:
 python3 random_search.py ../configfiles/rsrf.cfg
