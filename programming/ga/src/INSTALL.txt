@@ -1,0 +1,10 @@
+This code has been tested on Ubuntu 14.04.
+
+Needed Packages:
+-Python 3
+-pip to install python packages 
+-these pip packages:
+	-DEAP
+	-matplotlib
+	-numpy
+-python graph package, available here: https://graph-tool.skewed.de/-

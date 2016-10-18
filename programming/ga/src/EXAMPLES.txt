@@ -1,0 +1,35 @@
+This file contains some sample commands to run the computations via the command
+line:
+
+If you want to change the settings of your run, go into the configfiles and just
+change some of the settings there.
+
+!!!
+Keep in mind to change the path to the correct data files to run the
+computation, the are included in this CD. Otherwise the software won't find the
+data.
+!!!
+
+!!!
+All these commands need to be executed in the src folder to match the relativ
+path to the python and the config file. For other folders the commands need to
+be changed.
+!!!
+
+to run the genetic algorithm with a fixed number of nodes:
+python3 start.py ../configfiles/garf_default.cfg
+
+to run the genetic algorithm with a flexible number of nodes:
+python3 start.py ../configfiles/garflex_default.cfg
+
+to run the local search with a fixed number of nodes:
+python3 local_search.py ../configfiles/lsrf.cfg
+
+to run the greedy algorithm:
+python3 local_search_flexible.py ../configfiles/lsrflex_LIST.cfg
+
+to run the random search algorithm with a fixed number of nodes:
+python3 random_search.py ../configfiles/rsrf.cfg
+
+to run the random search algorithm with a flexible number of nodes:
+python3 random_search.py ../configfiles/rsrflex.cfg
