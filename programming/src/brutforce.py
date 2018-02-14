@@ -26,7 +26,7 @@ def brutforce(num_of_nodes, ind_len=config.IND_LEN):
     :returns: a tuple of the best fitness and best solution
 
     """
-    
+
     assert ind_len is not None
     assert ind_len > 0
 
@@ -61,6 +61,6 @@ def main():
 
     my_util.save_node_positions(config.FOLDER+"transmitterposs.txt", ind_max,
             config.POSITIONS)
-    
+
 if __name__ == "__main__":
     main()
